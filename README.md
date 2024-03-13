@@ -2,7 +2,7 @@
 
 This is the source code for the Dr Ecco Omniheurist website for hosting final projects for *Heuristic Problem Solving* at NYU.
 
-A draft version of this website exists at [https://cims.nyu.edu/~jw8710/drecco/](https://cims.nyu.edu/~jw8710/drecco/) (if it hasn't expired yet...). The GitHub repo is currently hosted at [https://github.com/wjmn/drecco](https://github.com/wjmn/drecco). 
+The GitHub repo is currently hosted at [https://github.com/wjmn/drecco](https://github.com/wjmn/drecco). 
 
 **NOTE**: none of the actual games are stored in this repository (except for a single example game, Gomoku). Games must be added into the `content/games` folder (see Adding Games below) and the site must then be rebuilt (see Development below - it's just one command). 
 
@@ -47,17 +47,15 @@ This will produce a `drecco-release.zip` zip file in this directory. This zip fi
 
 Again, first, make sure you have installed Zola locally (either via your package manager, or download the [prebuilt binaries available on GitHub](https://github.com/getzola/zola/releases)).
 
-To build/rebuild for deployment using CIMS Web Hosting, run the `build.sh` script (you can do this locally, you don't have to do this on the server), passing it the base URL for the course website (which is currently https://cims.nyu.edu/drecco2016):
+To build/rebuild for deployment using CIMS Web Hosting, run the `build.sh` script (you can do this locally, you don't have to do this on the server), passing it the base URL for the course website (which is currently https://cs.nyu.edu/~shasha/drecco):
 
 ```
-./build.sh "https://cims.nyu.edu/drecco2016"
+./build.sh "https://cs.nyu.edu/~shasha/drecco"
 ```
 
 This produces a `drecco-release.zip` zip file in this directory, which contains a folder called `drecco`. You will need to copy the contents of the `drecco` folder to the folder for the course Dr Ecco website.
 
-The current Dr Ecco website for the course is located at `/usr/httpd/entities/drecco2016`. Remove all the current files in this folder first to make it an empty directory (you might want to back it up beforehand!)
-
-Then, copy the `drecco-release.zip` folder to the server, unzip it, then recursively copy all the contents of the unzipped `drecco` folder into `/usr/httpd/entities/drecco2016`. You will probably need to update the permission recursively too for all files in this directory so the server can access them (`chmod -R 755 ./*` inside the `drecco2016` directory.)
+The current Dr Ecco website for the course is located in Prof Shasha's homepage directory `/web/shasha/` as `/web/shasha/drecco`. Replace the current `drecco` folder in that directory with the new `drecco` folder to update the website (you might want to back it up beforehand!). You will probably need to update the permissions recursively too for all files in this directory so the server can access them (`chmod -R 755 ./*` inside the `drecco` directory.)
 
 
 

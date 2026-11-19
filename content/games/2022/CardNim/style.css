@@ -1,0 +1,235 @@
+.main {
+    background-color: lightblue;
+    min-height: 100%;
+    margin: auto;
+}
+
+.main>.row {
+    min-height: 80%;
+    border: solid 1px black;
+}
+.game-title {
+    font-size: 0.6rem;
+    font-weight: bold;
+    text-align: center;
+}
+.game-config {
+    border-right: 1px solid black;
+    min-height: 80%;
+}
+
+.game-config-form input, 
+.game-config-form select, 
+.game-config-form .form-check label, 
+.game-config-form button {
+    margin-top: 20px;
+}
+
+.game-area {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background-color: #f6f6e8;
+    /* padding:1px; */
+}
+
+.splash {
+    position: absolute;
+    z-index: 1;
+    background-color: #f6f6e8;
+    /* opacity: 0.5; */
+    width: 100%;
+    height: 100%;
+    background-image: url('images/splash1.png');
+    background-size: 35%;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+
+.game-board {
+    /* border: 1px solid #000; */
+    flex: 2 1 auto;
+    /* background-color: white; */
+    background-color: #f6f6e8;
+}
+
+.game-current-player {
+    position: relative;
+}
+
+.game-current-player ul {
+    display: flex;
+    flex-wrap: wrap;
+    position: relative;
+}
+
+.game-current-player .game-card {
+    cursor: pointer;
+    width: 50px;
+    height:70px;
+    text-align: center;
+    margin: 2px;    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    background-size: 50px 70px;
+
+}
+
+.game-current-player .com_player_overlay {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: gray;
+    opacity: 0;
+    top:0;
+}
+
+
+@media (hover: hover) {
+    .game-current-player .game-card:hover {
+        background-color: pink;
+        color: white;
+        transform: rotate(-10deg) translateY(-0.5rem);
+    }
+}
+
+fieldset.current_player {
+    margin: 5px 0 20px 0;
+    padding: 0 10px 10px 10px
+}
+
+
+.player {
+    margin: 10px 0;
+    padding: 0 10px 10px 10px;
+    border-bottom: none;
+}
+
+.player ul {
+    display: flex;
+}
+
+li.game-card {
+    align-content: center;
+    text-align: center;
+    margin: 0 2px;
+    width: 25px;
+    list-style: none;
+    background-color: white;
+}
+
+
+.game-board .game-board--status {
+    margin-top: auto;
+    font-size: 1rem;
+    font-weight: bold;
+    flex-wrap: nowrap;
+}
+
+.game-board .game-board--status span {
+    flex: 0 0 fit-content;
+    padding: 1px;    
+}
+
+
+.game-board .game-board--stone-list .stone {
+    content: ".";
+    background-color: blueviolet;
+    width: 2rem;
+    height: 2rem;
+    display: block;
+    float: left;
+    margin: 5px;
+}
+
+.game-current-player {
+    clear: both;
+
+}
+
+
+
+.game-players legend{
+    font-size: 1rem;
+    color: black;
+}
+
+.game-players ul {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.game-players ul .game-card {
+    display: flex;
+    width: 2rem;
+    height: 2.6rem;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin: 2px;
+    background-size: 2rem 2.6rem;
+}
+
+.game-players .player {
+    position: relative;
+}
+
+
+.card0 {
+    background-image: url("images/card0.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.card1 {
+    background-image: url("images/card1.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.card2 {
+    background-image: url("images/card2.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.card3 {
+    background-image: url("images/card3.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.card4 {
+    background-image: url("images/card4.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+
+.stone0 {
+    background-image: url("images/stone.png");
+    background-size: 2rem 2rem;
+    background-repeat: no-repeat;
+}
+
+.turkey {
+    background-image: url("images/turkey.png");
+    background-size: 2rem 2rem;
+    background-repeat: no-repeat;
+}
+
+.lost {
+    background-image: url("images/lost.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    width: 5rem;
+    height: 5rem;
+    display: block;
+    position: absolute;
+    top: -40px;
+    left: -20px;    
+}

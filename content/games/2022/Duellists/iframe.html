@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <head>
+        <link rel="stylesheet" href="assets/css/styles.css">
+        <script src="assets/js/app.js"></script>
+    </head>
+    <body background="assets/images/background.webp" style="background-size:inherit">
+        <div class ="initdiv">
+
+            <div class="container-fluid startscreen"> 
+                <h1 class="page-header game-title" style="text-align: center; padding-bottom: 5%;"> The Duellists Game </h1> 
+                
+                <div class="information-container col-sm-3">
+                    <div class="information col-sm-10">
+                        <h2 class="information-header"></h2>
+                        <div class="info-form" style="padding-bottom:5%">
+                            <label for="player-1" style="padding:5%;"> Player 1 </label>
+                            <input type="text" class="info-input" id="player-1" value="Player 1">
+                            <label for="player-1" style="padding-left:5%"> Is AI </label>
+                            <input type="checkbox" id="player-1-AI">
+                        </div>
+                        
+                        <div class="info-form" style="padding-bottom:5%">
+                            <label for="player-2" style="padding:5%;"> Player 2 </label>
+                            <input type="text" class="info-input" id="player-2" value="Player 2">
+                            <label for="player-2" style="padding-left:5%"> Is AI </label>
+                            <input type="checkbox" id="player-2-AI">
+                        </div>
+                        
+                        <div class="info-form" style="padding-bottom:5%">
+                            <label for="weight-of-bullets" style="padding:5%"> Bullets </label>
+                            <select name="jackets" class="form-control info-input" id="number-of-bullets">
+                                <option value=1>1</option>
+                                <option value=2>2</option>
+                                <option value=3>3</option>
+                                <option value=4>4</option>
+                                <option value=5 selected="selected">5</option>
+                                <option value=6>6</option>
+                                <option value=7>7</option>
+                                <option value=8>8</option>
+                            </select>
+                        </div>
+                        
+                        <div class="info-form" style="padding-bottom:5%">
+                            <label for="number-of-jackets" style="padding:5%"> Jackets </label>
+                            <select name="jackets" class="form-control info-input" id="number-of-jackets">
+                                <option value=2>2</option>
+                                <option value=3>3</option>
+                                <option value=4>4</option>
+                            </select>
+                        </div>
+                        
+                        <div class="info-form" style="padding-bottom:10%">
+                            <label for="probab-func" style="padding:5%"> Probability Function </label>
+                            <select name="probab-func" class="form-control info-input" id="probab-func">
+                                <option value="linear">Linear</option>
+                                <option value="quadratic">Quadratic</option>
+                                <!-- <option value="exponential">Exponential</option> -->
+                            </select>
+                        </div>
+                        
+                        <!-- <div class="col-sm-12 alert alert-danger alert-dismissable" id="error-container">
+                            <a href="#" class="close" aria-label="close">&times;</a>
+                            <p id="error-message"> </p>
+                        </div> -->
+                        
+                        <div style="margin-left:40%; margin-right: 40%; width:50%">
+                            <button type="button" class="start-game shootbutton" onclick="init();">Start new game</button>
+                        </div>
+                        
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class ="gamediv">
+            <img class="gunman-1" src = "assets/images/gunman.svg" alt="Gunman 1"/>
+        <img class="gunman-2" src = "assets/images/gunman.svg" alt="Gunman 2"/>
+        <img class="bullet-1" src = "assets/images/bullet.svg" alt="Bullet 1"/>
+        <img class="bullet-2" src = "assets/images/bullet.svg" alt="Bullet 2"/>
+
+        <img class="p1-jacket" src="assets/images/jacket.png"/>
+        <img class="p2-jacket" src="assets/images/jacket.png"/>
+
+        <!-- <div> -->
+            <label class="jacket-1-text font" id="jacket-1-text" style="color: black;">Wear Jacket</label>
+            <input type="checkbox" id="player1-wear-jacket" class="jacket-1" onchange="checkJacket1()">
+            <button class="shootbutton shoot-1 font" id="player1-shoot">
+                Shoot
+            </button>
+            
+            <button class="skipbutton skip-1 font" id="player1-skip">
+                Skip
+            </button>
+        <!-- </div> -->
+        
+        
+        <label class="jacket-2-text font" id="jacket-2-text" style="color: black;">Wear Jacket</label>
+        <input type="checkbox" id="player2-wear-jacket" class="jacket-2" onchange="checkJacket2()">
+
+        <button class="shootbutton shoot-2 font" id="player2-shoot">
+            Shoot
+        </button>
+        
+        <button class="skipbutton skip-2 font" id="player2-skip">
+            Skip
+        </button>
+
+        <div id="player-1-name" class="scoreboard playername-1 font">Placeholder</div>
+
+        <div id="score-1" class="scoreboard scoreboard-1">
+            <table>
+                <tr>
+                    <th class="font">Bullets</th>
+                    <td class="font" id="p1bullets">10</td>
+                </tr>
+                <tr>
+                    <th class="font">Jackets</th>
+                    <td class="font" id="p1jackets">2</td>
+                </tr>
+                <tr>
+                    <th class="font">Hit Chance</th>
+                    <td class="font" id="p1hit">20%</td>
+                </tr>
+            </table>
+        </div>
+
+        <div id="player-1-name" class="scoreboard playername-2 font">asdjasfjajsdhfkhasdf</div>
+        
+        <div id="score-2" class="scoreboard scoreboard-2">
+            <table>
+                <tr>
+                    <th class="font">Bullets</th>
+                    <td class="font" id="p2bullets">10</td>
+                </tr>
+                <tr>
+                    <th class="font">Jackets</th>
+                    <td class="font" id="p2jackets">2</td>
+                </tr>
+                <tr>
+                    <th class="font">Hit Chance</th>
+                    <td class="font" id="p2hit">20%</td>
+                </tr>
+            </table>
+        </div>
+
+        <div id="score-common" class="scoreboard scoreboard-common">
+            <table>
+                <tr>
+                    <th class="font-common">Distance</th>
+                    <td class="font-common" id="distance">10</td>
+                </tr>
+            </table>
+        </div>
+
+        <dialog class="gameover font-gameover">
+            Game Over
+            <!-- <br></br> -->
+            <div class="gameover-info">
+                <table>
+                    <tr>
+                        <th class="winner">Winner: </th>
+                        <td class="winner" id="winner-value">Winner: </td>
+                    </tr>
+                    <tr>
+                        <th class="score">Score: </th>
+                        <td class="score" id="score-value">Score: </td>
+                    </tr>
+                </table>
+                <label class="font-bullets-over" id="bullets-over-text" style="visibility: hidden;">No more bullets left</label>
+            </div>
+            <button id="newgame" class="shootbutton" padding="20px" onclick="newGame();">
+                Start New Game
+            </button>
+        </dialog>
+        </div>
+    </body>
+ </html>

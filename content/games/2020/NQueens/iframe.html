@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+
+    <title>N Queens</title>
+
+    <style>
+        .navbar {
+            margin-bottom: 20px;
+        }
+
+        .btn-group {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .card {
+            margin-bottom: 1rem;
+        }
+
+        #player-1-score {
+            background-color: #17a2b8;
+        }
+
+        #player-2-score {
+            background-color: #ffc107;
+        }
+
+        #player-3-score {
+            background-color: #f8d7da;
+        }
+
+        #player-4-score {
+            background-color: #007bff;
+        }
+
+        #chess-board svg {
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-light bg-light">
+    <span class="navbar-brand mb-0 h1">N Queens</span>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#new-game-modal" data-backdrop="static">New Game</button>
+                <button type="button" class="btn btn-secondary" id="restart-btn">Restart</button>
+                <button type="button" class="btn btn-danger" id="undo-btn">Undo</button>
+            </div>
+
+            <div class="alert alert-danger" role="alert" id="game-over-info" style="display: none"></div>
+            <div class="alert alert-primary" role="alert" id="info"></div>
+            <div class="alert alert-warning" role="alert" id="team-mode-info" style="display: none">
+                Team Mode is on! Queens placed by the same player will be on the same team and will not kill each other.
+            </div>
+
+            <div class="card">
+                <ul class="list-group list-group-flush text-white" id="score-ul"></ul>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Game Steps</div>
+                <ul class="list-group list-group-flush" id="game-steps-ul"></ul>
+            </div>
+        </div>
+        <div class="col-lg-9" id="chess-board"></div>
+    </div>
+</div>
+
+<div class="modal fade" id="new-game-modal" tabindex="-1" aria-labelledby="NewGameModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">New Game</h5>
+            </div>
+            <form onsubmit="startGame(); return false;">
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <label for="chessboard-width" class="col-sm-3 col-form-label">Chessboard Width</label>
+                        <div class="col-sm-9">
+                            <input type="number" min="1" max="30" class="form-control" id="chessboard-width" required>
+                            <small class="form-text text-muted">
+                                Required. Chessboard width must be a number between 1 and 30.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="chessboard-height" class="col-sm-3 col-form-label">Chessboard Height</label>
+                        <div class="col-sm-9">
+                            <input type="number" min="1" max="30" class="form-control" id="chessboard-height" required>
+                            <small class="form-text text-muted">
+                                Required. Chessboard width must be a number between 1 and 30.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <legend class="col-form-label col-sm-3 pt-0">Number of Players</legend>
+                        <div class="col-sm-9">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="number-players-1" name="number-players" value="1" checked>
+                                <label class="form-check-label" for="number-players-1">1</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="number-players-2" name="number-players" value="2">
+                                <label class="form-check-label" for="number-players-2">2</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="number-players-3" name="number-players" value="3">
+                                <label class="form-check-label" for="number-players-3">3</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="number-players-4" name="number-players" value="4">
+                                <label class="form-check-label" for="number-players-4">4</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row" id="player-1-name-container">
+                        <label for="player-1-name" class="col-sm-3 col-form-label">Player 1's Name</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="player-1-name">
+                        </div>
+                    </div>
+                    <div class="form-group row" id="player-2-name-container" style="display: none">
+                        <label for="player-2-name" class="col-sm-3 col-form-label">Player 2's Name</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="player-2-name">
+                        </div>
+                    </div>
+                    <div class="form-group row" id="player-3-name-container" style="display: none">
+                        <label for="player-3-name" class="col-sm-3 col-form-label">Player 3's Name</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="player-3-name">
+                        </div>
+                    </div>
+                    <div class="form-group row" id="player-4-name-container" style="display: none">
+                        <label for="player-4-name" class="col-sm-3 col-form-label">Player 4's Name</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="player-4-name">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <legend class="col-form-label col-sm-3 pt-0">Team Mode</legend>
+                        <div class="col-sm-9">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="team-mode-on" name="team-mode" value="on" >
+                                <label class="form-check-label" for="team-mode-on">On</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="team-mode-off" name="team-mode" value="off" checked>
+                                <label class="form-check-label" for="team-mode-off">Off</label>
+                            </div>
+                            <small class="form-text text-muted">
+                                If Team Mode is on, queens placed by the same player will be on the same team and will not kill each other.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Start</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script src="js/jquery-3.5.1.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/d3.min.js"></script>
+<script>
+    const cellSize = 40
+    const margin = 21
+    const cellStatus = {
+        EMPTY: 'empty',
+        QUEEN: 'queen',
+        QUEEN_HOVER: 'queen_hover',
+        BLOCKED_OTHER_TEAM: 'blocked_other_team',
+        BLOCKED_MY_TEAM: 'blocked_my_team',
+        BLOCKED_HOVER: 'blocked_hover'
+    }
+
+    const chessBoardDiv = d3.select("#chess-board")
+
+    const teamColors = ["#17a2b8", "#ffc107", "#f8d7da", "#007bff"]
+
+    let a
+    let b
+    let numberOfPlayers = 1
+    let currentPlayer = undefined
+    let playerNames = []
+    let playerScores = []
+    let isTeamMode = false
+    let steps = []
+
+    let chessBoardSvg
+    let cells
+    let locToCell
+
+    function initBoard() {
+
+        const boardWidth = a * cellSize
+        const boardHeight = b * cellSize
+
+        cells = []
+        locToCell = {}
+
+        for (let row = 0; row < a; row ++) {
+            locToCell[row] = {}
+
+            for (let col = 0; col < b; col ++) {
+                let cell = {
+                    x: row,
+                    y: col,
+                    fill: ((row % 2 === 0 && col % 2 === 0) || (row % 2 === 1 && col % 2 === 1)) ? "#F5F5DC" : "#D2B48C",
+                    status: cellStatus.EMPTY,
+                    player: undefined
+                }
+                cells.push(cell)
+                locToCell[row][col] = cell
+            }
+        }
+
+        chessBoardDiv.selectAll("*").remove()
+
+        chessBoardSvg = chessBoardDiv.append("svg")
+            .attr("width", `${boardWidth + margin}px`)
+            .attr("height", `${boardHeight + margin}px`)
+            .append("g")
+            .attr("transform", `translate(${margin}, ${margin})`)
+
+        const chessBoardCells = chessBoardSvg.selectAll(".cells")
+            .data(cells)
+            .enter()
+            .append("g")
+
+        chessBoardCells.append("rect")
+            .attr("class", "cell-rect")
+            .attr("x", (d) => d.x * cellSize)
+            .attr("y", (d) => d.y * cellSize)
+            .attr("width", `${cellSize}px`)
+            .attr("height", `${cellSize}px`)
+            .attr("fill", (d) => d.fill)
+            .style("cursor", "pointer")
+            .on("mouseover", (event, d) => chessboardMouseover(d))
+            .on("mouseout", (event, d) => chessboardMouseout(d))
+            .on("click", (event, d) => chessboardClick(d))
+
+        chessBoardCells.append("svg:image")
+            .attr("class", "cell-image")
+            .attr("x", (d) => d.x * cellSize)
+            .attr("y", (d) => d.y * cellSize)
+            .attr("width", cellSize)
+            .attr("height", cellSize)
+            .style("pointer-events", "none")
+
+        let colLabels = []
+        let rowLabels = []
+
+        for (let row = 0; row < a; row ++) {
+            rowLabels.push(numToLetter(row + 1))
+        }
+
+        for (let col = 0; col < b; col ++) {
+            colLabels.push(col + 1)
+        }
+
+        chessBoardSvg.selectAll(".rowLabel")
+            .data(rowLabels)
+            .enter().append("text")
+            .text((d) => d)
+            .attr("y", 0)
+            .attr("x", (d, i) => i * cellSize)
+            .style("font-size", `${cellSize / 3}px`)
+            .style("text-anchor", "middle")
+            .style("opacity", 0.75)
+            .attr("transform", `translate(${cellSize / 2}, -6)`)
+
+        chessBoardSvg.selectAll(".colLabel")
+            .data(colLabels)
+            .enter().append("text")
+            .text((d) => d)
+            .attr("y", (d, i) => i * cellSize)
+            .attr("x", 0)
+            .style("font-size", `${cellSize / 3}px`)
+            .style("text-anchor", "middle")
+            .style("opacity", 0.75)
+            .attr("transform", `translate(-15, ${cellSize / 1.5})`)
+    }
+
+    function chessboardMouseover (d) {
+        if (d.status === cellStatus.QUEEN)
+            return
+
+        locToCell[d.x][d.y].status = cellStatus.QUEEN_HOVER
+
+        calBoard()
+        updateBoard()
+    }
+
+    function chessboardMouseout(d) {
+        if (d.status !== cellStatus.QUEEN_HOVER)
+            return
+
+        locToCell[d.x][d.y].status = cellStatus.EMPTY
+
+            calBoard()
+        updateBoard()
+    }
+
+    function chessboardClick(d) {
+        if (d.status !== cellStatus.QUEEN_HOVER)
+            return
+
+        locToCell[d.x][d.y].status = cellStatus.QUEEN
+        locToCell[d.x][d.y].player = currentPlayer
+
+        steps.push({x: d.x, y: d.y, player: currentPlayer})
+        appendStep(`${playerNames[currentPlayer]}: place at ${numToLetter(d.x + 1)}${d.y + 1}`)
+
+        playerScores[currentPlayer] += 1
+
+        nextPlayer()
+        calBoard()
+        updateBoard()
+        updateScores()
+
+        isGameOver()
+    }
+
+    function getBlockCells(x, y) {
+        cells = []
+
+        // same row
+        for (let row = 0; row < a; row ++) {
+            if (row !== x) {
+                cells.push(locToCell[row][y])
+            }
+        }
+
+        // same col
+        for (let col = 0; col < b; col ++) {
+            if (col !== y) {
+                cells.push(locToCell[x][col])
+            }
+        }
+
+        // same diagonal
+        for (let row = x - 1, col = y - 1; row >= 0 && col >= 0; row --, col --) {
+            cells.push(locToCell[row][col])
+        }
+        for (let row = x + 1, col = y + 1; row < a && col < b; row ++, col ++) {
+            cells.push(locToCell[row][col])
+        }
+        for (let row = x + 1, col = y - 1; row < a && col >= 0; row ++, col --) {
+            cells.push(locToCell[row][col])
+        }
+        for (let row = x - 1, col = y + 1; row >= 0 && col < b; row --, col ++) {
+            cells.push(locToCell[row][col])
+        }
+
+        return cells
+    }
+
+    function isGameOver() {
+        for (let row = 0; row < a; row ++) {
+            for (let col = 0; col < b; col++) {
+                let cell = locToCell[row][col]
+
+                if (cell.status === cellStatus.EMPTY) {
+                    return
+                }
+
+                if (isTeamMode && cell.status === cellStatus.BLOCKED_MY_TEAM) {
+                    return
+                }
+            }
+        }
+
+        $("#game-over-info").html(`Game Over! ${playerNames[currentPlayer]} lost the game.`)
+        $("#game-over-info").slideDown()
+    }
+
+    function calBoard() {
+        let queensOtherTeam = []
+        let queensMyTeam = []
+        let queenHover = undefined
+
+        for (let row = 0; row < a; row ++) {
+            for (let col = 0; col < b; col ++) {
+                let cell = locToCell[row][col]
+
+                switch (cell.status){
+                    case cellStatus.QUEEN:
+                        if (cell.player === currentPlayer) {
+                            queensMyTeam.push(cell)
+                        } else {
+                            queensOtherTeam.push(cell)
+                        }
+                        break
+
+                    case cellStatus.QUEEN_HOVER:
+                        queenHover = cell
+                        break
+
+                    default:
+                        cell.status = cellStatus.EMPTY
+                }
+            }
+        }
+
+        for (let cell of queensOtherTeam) {
+            let blockedCells = getBlockCells(cell.x, cell.y)
+
+            for (let blockedCell of blockedCells) {
+                if (blockedCell.status === cellStatus.EMPTY) {
+                    blockedCell.status = cellStatus.BLOCKED_OTHER_TEAM
+                }
+            }
+        }
+
+        for (let cell of queensMyTeam) {
+            let blockedCells = getBlockCells(cell.x, cell.y)
+
+            for (let blockedCell of blockedCells) {
+                if (blockedCell.status === cellStatus.EMPTY) {
+                    blockedCell.status = cellStatus.BLOCKED_MY_TEAM
+                }
+            }
+        }
+
+        if (queenHover !== undefined) {
+            let blockedCells = getBlockCells(queenHover.x, queenHover.y)
+
+            for (let blockedCell of blockedCells) {
+                if (blockedCell.status === cellStatus.EMPTY) {
+                    blockedCell.status = cellStatus.BLOCKED_HOVER
+                }
+            }
+        }
+    }
+
+    function updateBoard() {
+        d3.selectAll(".cell-rect")
+            .attr("fill", (d) => {
+                if (isTeamMode) {
+                    switch (d.status) {
+                        case cellStatus.BLOCKED_HOVER:
+                            return d.fill === "#F5F5DC" ? "#ABF899" : "#92CA61"
+
+                        case cellStatus.BLOCKED_MY_TEAM:
+                            return d.fill === "#F5F5DC" ? "#7AF96E" : "#69D946"
+
+                        case cellStatus.BLOCKED_OTHER_TEAM:
+                            return d.fill === "#F5F5DC" ? "#7A7A6D" : "#685945"
+
+                        case cellStatus.QUEEN:
+                            if (isTeamMode)
+                                return teamColors[d.player]
+                            else
+                                return d.fill
+
+                        case cellStatus.QUEEN_HOVER:
+                            if (isTeamMode)
+                                return teamColors[currentPlayer]
+                            else
+                                return d.fill
+
+                        default:
+                            return d.fill
+                    }
+                } else {
+                    switch (d.status) {
+                        case cellStatus.BLOCKED_HOVER:
+                            return d.fill === "#F5F5DC" ? "#ABF899" : "#92CA61"
+
+                        case cellStatus.BLOCKED_MY_TEAM:
+                        case cellStatus.BLOCKED_OTHER_TEAM:
+                            return d.fill === "#F5F5DC" ? "#7A7A6D" : "#685945"
+
+                        default:
+                            return d.fill
+                    }
+                }
+            })
+            .style("pointer-events", (d) => {
+                if (d.status === cellStatus.QUEEN || d.status === cellStatus.BLOCKED_OTHER_TEAM) {
+                    return "none"
+                }
+
+                if (!isTeamMode && d.status === cellStatus.BLOCKED_MY_TEAM) {
+                    return "none"
+                }
+
+                return ""
+            })
+
+        d3.selectAll(".cell-image")
+            .attr("xlink:href", (d) => {
+                switch (d.status) {
+                    case cellStatus.QUEEN:
+                    case cellStatus.QUEEN_HOVER:
+                        return "image/queen.svg"
+
+                    default:
+                        return ""
+                }
+            })
+            .attr("class", (d) => {
+                if (d.status === cellStatus.QUEEN) {
+                    return `cell-image player-${d.player}-image`
+                }
+                return "cell-image"
+            })
+    }
+
+    function updateScores() {
+        $("#score-ul").html("")
+        for (let i = 0; i < numberOfPlayers; i ++) {
+            $("#score-ul").append(
+                `<li class="list-group-item score-item" id="player-${i + 1}-score">${playerNames[i]}: ${playerScores[i]}</li>`
+            )
+        }
+    }
+
+    function numToLetter(num) {
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        let result = ""
+
+        while (num > 0) {
+            let charIndex = num % alphabet.length
+            num = Math.floor(num / alphabet.length)
+
+            if(charIndex - 1 === -1){
+                charIndex = alphabet.length
+                num --;
+            }
+
+            result = alphabet.charAt(charIndex-1) + result;
+        }
+
+        return result
+    }
+
+    $("input[type=radio][name=number-players]").on("change", function () {
+        const numberOfPlayers = Number($(this).val())
+
+        for (let i = 1; i <= numberOfPlayers; i ++) {
+            $(`#player-${i}-name-container`).slideDown()
+        }
+
+        for (let i = numberOfPlayers + 1; i <= 4; i ++) {
+            $(`#player-${i}-name-container`).slideUp()
+        }
+    })
+
+    function startGame() {
+        let sizeA = parseInt($("#chessboard-width").val())
+        let sizeB = parseInt($("#chessboard-height").val())
+
+        if (!isNaN(sizeA) && sizeA > 0 && sizeA <= 30 && !isNaN(sizeB) && sizeB > 0 && sizeB <= 30) {
+            a = sizeA
+            b = sizeB
+
+            isTeamMode = ($('input[name=team-mode]:checked').val() === 'on')
+
+            numberOfPlayers = parseInt($('input[name=number-players]:checked').val())
+
+            playerNames = []
+            playerScores = []
+
+            for (let i = 1; i <= numberOfPlayers; i ++) {
+                let name = $(`#player-${i}-name`).val()
+
+                if (name === "") {
+                    playerNames.push(`Player ${i}`)
+                } else {
+                    playerNames.push(`Player ${i} (${name})`)
+                }
+
+                playerScores.push(0)
+            }
+
+            currentPlayer = undefined
+
+            initBoard()
+
+            nextPlayer()
+
+            $('#new-game-modal').modal('hide')
+
+            $("#game-steps-ul").html("")
+
+            steps = []
+
+            $("#game-over-info").slideUp()
+
+            updateScores()
+
+            if (isTeamMode) {
+                $("#team-mode-info").slideDown()
+            } else {
+                $("#team-mode-info").slideUp()
+            }
+        }
+    }
+
+    function appendStep(message) {
+        $("#game-steps-ul").append(`<li class="list-group-item">${message}</li>`)
+    }
+
+    $("#restart-btn").on("click", () => startGame())
+
+    $("#undo-btn").on("click", function () {
+        if (steps.length === 0) {
+            return
+        }
+
+        let step = steps.pop()
+
+        locToCell[step.x][step.y].status = cellStatus.EMPTY
+
+        appendStep(`${playerNames[step.player]}: undo at ${numToLetter(step.x + 1)}${step.y + 1}`)
+        playerScores[step.player] -= 1
+
+        nextPlayer(true)
+        calBoard()
+        updateBoard()
+        updateScores()
+
+        $("#game-over-info").slideUp()
+    })
+
+    function nextPlayer(reverse = false) {
+        if (currentPlayer === undefined) {
+            currentPlayer = 0
+        } else {
+            if (!reverse) {
+                currentPlayer = (currentPlayer + 1) % numberOfPlayers
+            } else {
+                currentPlayer = (currentPlayer === 0) ? numberOfPlayers - 1 : currentPlayer - 1
+            }
+        }
+
+        $("#info").html(`${playerNames[currentPlayer]}'s Turn`)
+    }
+
+    $('#new-game-modal').modal({backdrop: 'static'})
+</script>
+</body>
+</html>

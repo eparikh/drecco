@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garden Planters</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.game-container {
+  width: 1280px;
+  height: 960px;
+  background: linear-gradient(to bottom, #87ceeb 0%, #98d8c8 100%);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  display: flex;
+  padding: 30px;
+  gap: 30px;
+}
+
+.board-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.board-wrapper {
+  position: relative;
+  display: flex;
+  gap: 5px;
+}
+
+.coord-labels-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-end;
+  padding-right: 5px;
+  padding-top: 6px;
+  gap: 2px;
+}
+
+.coord-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #2d3748;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 20px;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(10, 60px);
+  grid-template-rows: repeat(10, 60px);
+  gap: 2px;
+  background: #654321;
+  padding: 2px;
+  border: 4px solid #4a3319;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.cell {
+  width: 60px;
+  height: 60px;
+  background: #8b7355;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cell:nth-child(odd) {
+  background: #a0826d;
+}
+
+.cell:hover {
+  filter: brightness(1.1);
+}
+
+.cell.legal-move {
+  background: rgba(144, 238, 144, 0.7);
+  box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.5);
+  cursor: pointer;
+}
+
+.cell.selected {
+  box-shadow: inset 0 0 0 3px #ffd700;
+  filter: brightness(1.2);
+}
+
+.gardener {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 3px solid;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.gardener.p1 {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+  border-color: #c92a2a;
+  color: white;
+}
+
+.gardener.p2 {
+  background: linear-gradient(135deg, #4dabf7, #339af0);
+  border-color: #1864ab;
+  color: white;
+}
+
+.gardener:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.flower {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  animation: placeFlower 0.4s ease-out;
+  z-index: 5;
+}
+
+@keyframes placeFlower {
+  from {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+.flower.sunflower { background: #ffd93d; }
+.flower.rose { background: #ff6b9d; }
+.flower.lily { background: #74c0fc; }
+.flower.wildflower { background: linear-gradient(135deg, #ff6b6b, #ffd93d, #74c0fc, #ff6b9d); }
+
+.rose-block {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 107, 157, 0.15);
+  border: 2px solid rgba(255, 107, 157, 0.4);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.sunflower-block {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 215, 0, 0.15);
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.sidebar {
+  width: 300px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.title {
+  text-align: center;
+  color: #2d3748;
+  margin: 0;
+  padding: 0;
+}
+
+.title h1 {
+  font-size: 21px;
+  margin: 0 0 3px 0;
+  color: #48bb78;
+  white-space: nowrap;
+  padding: 0 5px;
+}
+
+.title p {
+  font-size: 12px;
+  color: #718096;
+}
+
+.status {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 12px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.inventory {
+  background: #f7fafc;
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+}
+
+.inventory h3 {
+  margin-bottom: 8px;
+  color: #2d3748;
+  font-size: 14px;
+}
+
+.flower-counts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.flower-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  background: white;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.flower-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.flower-selector {
+  background: #f7fafc;
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+}
+
+.flower-selector h3 {
+  margin-bottom: 8px;
+  color: #2d3748;
+  font-size: 14px;
+}
+
+.garden-features {
+  background: #f7fafc;
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+  margin-bottom: 15px;
+}
+
+.garden-features h3 {
+  margin-bottom: 8px;
+  color: #2d3748;
+  font-size: 14px;
+  text-align: center;
+}
+
+.feature-btn {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 6px;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #2d3748;
+}
+
+.feature-btn:last-child {
+  margin-bottom: 0;
+}
+
+.feature-btn:hover:not(.used) {
+  border-color: #667eea;
+  transform: translateY(-1px);
+}
+
+.feature-btn.used {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #e2e8f0;
+}
+
+.feature-btn.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-color: #667eea;
+  color: white;
+}
+
+.flower-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.flower-option {
+  padding: 8px;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.flower-option:hover:not(.disabled) {
+  border-color: #48bb78;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.flower-option.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.selectors-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.mode-selector {
+  background: #f7fafc;
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+}
+
+.mode-selector.compact {
+  padding: 10px;
+}
+
+.mode-selector h4 {
+  margin: 0 0 8px 0;
+  color: #2d3748;
+  font-size: 12px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.mode-btn {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 5px;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #2d3748;
+}
+
+.mode-btn.small {
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.mode-btn:last-child {
+  margin-bottom: 0;
+}
+
+.mode-btn:hover {
+  border-color: #48bb78;
+  transform: translateY(-1px);
+}
+
+.mode-btn.active {
+  background: linear-gradient(135deg, #48bb78, #38a169);
+  border-color: #38a169;
+  color: white;
+}
+
+button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #48bb78, #38a169);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.modal-content h2 {
+  color: #48bb78;
+  margin-bottom: 20px;
+  font-size: 28px;
+}
+
+.score-section {
+  margin: 15px 0;
+  padding: 15px;
+  background: #f7fafc;
+  border-radius: 8px;
+  border-left: 4px solid #48bb78;
+}
+
+.score-section h3 {
+  color: #2d3748;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.score-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  font-size: 14px;
+}
+
+.final-scores {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 10px;
+  color: white;
+}
+
+.player-score {
+  text-align: center;
+}
+
+.player-score h3 {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.player-score .score {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.ai-thinking {
+  background: rgba(102, 126, 234, 0.9);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-align: center;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.rules {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #2d3748;
+}
+
+.rules h4 {
+  color: #48bb78;
+  margin: 15px 0 8px 0;
+}
+
+.rules ul {
+  margin-left: 20px;
+}
+
+.rules li {
+  margin: 5px 0;
+}
+</style>
+</head>
+<body>
+
+<div class="game-container">
+  <div class="board-section">
+    <div class="board-wrapper">
+      <div class="coord-labels-left">
+        <div class="coord-label">0</div>
+        <div class="coord-label">1</div>
+        <div class="coord-label">2</div>
+        <div class="coord-label">3</div>
+        <div class="coord-label">4</div>
+        <div class="coord-label">5</div>
+        <div class="coord-label">6</div>
+        <div class="coord-label">7</div>
+        <div class="coord-label">8</div>
+        <div class="coord-label">9</div>
+      </div>
+      <div class="board" id="board"></div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="title">
+      <h1>🌻 Garden Planters 🦋</h1>
+      <p>Strategic Garden Design</p>
+    </div>
+
+    <div class="status" id="status">Player 1's Turn</div>
+
+    <div id="aiThinking" class="ai-thinking" style="display: none;">
+      AI is thinking...
+    </div>
+
+    <div class="inventory" id="inventory">
+      <h3>Your Flowers</h3>
+      <div class="flower-counts" id="flowerCounts"></div>
+    </div>
+
+    <div class="flower-selector" id="flowerSelector" style="display: none;">
+      <h3>Choose Flower to Plant</h3>
+      <div class="flower-options" id="flowerOptions"></div>
+    </div>
+
+    <div class="garden-features" id="gardenFeatures" style="display: none;">
+      <h3>Garden Features</h3>
+      <button class="feature-btn" id="fountainBtn" onclick="useFeature('fountain')">⛲ Fountain</button>
+      <button class="feature-btn" id="compostBtn" onclick="useFeature('compost')">🗑️ Compost Bin</button>
+      <button class="feature-btn" id="scarecrowBtn" onclick="useFeature('scarecrow')">🧹 Scarecrow</button>
+    </div>
+
+    <div class="controls">
+      <button class="btn-primary" onclick="newGame()">New Game</button>
+      <button class="btn-secondary" onclick="showRules()">View Rules</button>
+      
+      <div class="selectors-container">
+        <div class="mode-selector compact">
+          <h4>Level</h4>
+          <button class="mode-btn small" id="beginnerLevel" onclick="setLevel('beginner')">Beginner</button>
+          <button class="mode-btn small active" id="standardLevel" onclick="setLevel('standard')">Standard</button>
+          <button class="mode-btn small" id="advancedLevel" onclick="setLevel('advanced')">Advanced</button>
+        </div>
+        
+        <div class="mode-selector compact">
+          <h4>Mode</h4>
+          <button class="mode-btn small active" id="aiMode" onclick="setGameMode('ai')">vs AI</button>
+          <button class="mode-btn small" id="pvpMode" onclick="setGameMode('pvp')">vs Player</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="endGameModal">
+  <div class="modal-content">
+    <h2 id="winnerText"></h2>
+    <div id="scoreBreakdown"></div>
+    <button class="btn-primary" onclick="newGame()" style="width: 100%; margin-top: 20px;">Play Again</button>
+  </div>
+</div>
+
+<div class="modal" id="rulesModal" onclick="if(event.target.id==='rulesModal')hideRules()">
+  <div class="modal-content">
+    <h2>How to Play</h2>
+    <div class="rules">
+      <h4>Game Modes</h4>
+      <p><strong>vs Computer:</strong> Play against the AI opponent<br>
+      <strong>vs Player:</strong> Play with a friend on the same device</p>
+      
+      <h4>Objective</h4>
+      <p>Move your gardeners and plant flowers strategically. Force your opponent to run out of moves to win!</p>
+      
+      <h4>Your Turn (3 Steps)</h4>
+      <ul>
+        <li><strong>MOVE:</strong> Click your gardener, then click an empty square to move (like a chess queen - any straight line)</li>
+        <li><strong>PLANT:</strong> Choose a flower type to place on the square you moved FROM</li>
+        <li><strong>END:</strong> Your turn ends automatically</li>
+      </ul>
+      
+      <h4>Flower Types</h4>
+      <ul>
+        <li><strong>🌻 Sunflower:</strong> Blocks its square</li>
+        <li><strong>🌹 Rose Bush:</strong> Blocks its square + 4 diagonals</li>
+        <li><strong>💧 Lily Pond:</strong> Blocks its square</li>
+        <li><strong>🌈 Wildflower:</strong> Place on FROM square OR any empty adjacent square</li>
+      </ul>
+      
+      <h4>Winning</h4>
+      <p>When a player cannot move any gardener, they lose. The player who can still move wins!</p>
+      
+      <h4>Scoring</h4>
+      <ul>
+        <li>Each flower: 1 point</li>
+        <li>Connected groups: +1 per flower in group</li>
+        <li>Rainbow 2×2 (all 4 types): +10</li>
+        <li>Winner: +25</li>
+        <li>Mobile gardeners: +3 each</li>
+      </ul>
+    </div>
+    <button class="btn-primary" onclick="hideRules()" style="width: 100%; margin-top: 20px;">Got it!</button>
+  </div>
+</div>
+
+<script>
+const FLOWER_TYPES = {
+  SUNFLOWER: 'sunflower',
+  ROSE: 'rose',
+  LILY: 'lily',
+  WILDFLOWER: 'wildflower'
+};
+
+const FLOWER_ICONS = {
+  sunflower: '🌻',
+  rose: '🌹',
+  lily: '💧',
+  wildflower: '🌈'
+};
+
+const FLOWER_NAMES = {
+  sunflower: 'Sunflower',
+  rose: 'Rose Bush',
+  lily: 'Lily Pond',
+  wildflower: 'Wildflower'
+};
+
+const INITIAL_COUNTS = {
+  sunflower: 10,
+  rose: 5,
+  lily: 4,
+  wildflower: 5
+};
+
+function getCurrentSeason() {
+  if (gameState.level !== 'advanced') return 'spring';
+  if (gameState.turnCount < 8) return 'spring';      // Turns 1-8 (turnCount 0-7)
+  if (gameState.turnCount < 16) return 'summer';     // Turns 9-16 (turnCount 8-15)
+  if (gameState.turnCount < 24) return 'autumn';     // Turns 17-24 (turnCount 16-23)
+  return 'winter';                                    // Turn 25+ (turnCount 24+)
+}
+
+function getFlowerCountsForLevel(level) {
+  if (level === 'beginner') {
+    return {
+      sunflower: 15,
+      rose: 10,
+      lily: 0,
+      wildflower: 0
+    };
+  } else if (level === 'standard' || level === 'advanced') {
+    return {
+      sunflower: 10,
+      rose: 5,
+      lily: 4,
+      wildflower: 5
+    };
+  }
+  return INITIAL_COUNTS;
+}
+
+let gameState = {
+  board: Array(10).fill(null).map(() => Array(10).fill(null)),
+  currentPlayer: 1,
+  selectedGardener: null,
+  moveFrom: null,
+  phase: 'select', // 'select', 'move', 'plant'
+  gardeners: {
+    1: [{r:0,c:3}, {r:3,c:0}, {r:6,c:0}, {r:9,c:3}],
+    2: [{r:0,c:6}, {r:3,c:9}, {r:6,c:9}, {r:9,c:6}]
+  },
+  flowers: {
+    1: { sunflower: 10, rose: 5, lily: 4, wildflower: 5 },
+    2: { sunflower: 10, rose: 5, lily: 4, wildflower: 5 }
+  },
+  placedFlowers: [],
+  gameOver: false,
+  vsAI: true,
+  level: 'standard',
+  turnCount: 0,
+  features: {
+    fountain: { used: {1: false, 2: false} },
+    compost: { used: {1: false, 2: false}, count: {1: 0, 2: 0} },
+    scarecrow: { used: {1: false, 2: false}, active: false }
+  }
+};
+
+function initGame() {
+  const savedLevel = gameState.level || 'standard';
+  const savedVsAI = gameState.vsAI !== undefined ? gameState.vsAI : true;
+  
+  const flowerCounts = getFlowerCountsForLevel(savedLevel);
+  
+  gameState = {
+    board: Array(10).fill(null).map(() => Array(10).fill(null)),
+    currentPlayer: 1,
+    selectedGardener: null,
+    moveFrom: null,
+    phase: 'select',
+    gardeners: {
+      1: [{r:0,c:3}, {r:3,c:0}, {r:6,c:0}, {r:9,c:3}],
+      2: [{r:0,c:6}, {r:3,c:9}, {r:6,c:9}, {r:9,c:6}]
+    },
+    flowers: {
+      1: {...flowerCounts},
+      2: {...flowerCounts}
+    },
+    placedFlowers: [],
+    gameOver: false,
+    vsAI: savedVsAI,
+    level: savedLevel,
+    turnCount: 0,
+    features: {
+      fountain: { used: {1: false, 2: false} },
+      compost: { used: {1: false, 2: false}, count: {1: 0, 2: 0} },
+      scarecrow: { used: {1: false, 2: false}, active: false }
+    }
+  };
+  
+  gameState.gardeners[1].forEach(g => gameState.board[g.r][g.c] = {type: 'gardener', player: 1});
+  gameState.gardeners[2].forEach(g => gameState.board[g.r][g.c] = {type: 'gardener', player: 2});
+  
+  // Show/hide garden features based on level
+  const featuresDiv = document.getElementById('gardenFeatures');
+  if (featuresDiv) {
+    featuresDiv.style.display = savedLevel === 'advanced' ? 'block' : 'none';
+  }
+  
+  renderBoard();
+  updateStatus();
+  updateInventory();
+  updateFeatureButtons();
+}
+
+function renderBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  
+  for (let r = 0; r < 10; r++) {
+    for (let c = 0; c < 10; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+      cell.onclick = () => handleCellClick(r, c);
+      
+      const content = gameState.board[r][c];
+      if (content) {
+        if (content.type === 'gardener') {
+          const gardener = document.createElement('div');
+          gardener.className = `gardener p${content.player}`;
+          gardener.textContent = '👤';
+          cell.appendChild(gardener);
+        } else if (content.type === 'flower') {
+          const flower = document.createElement('div');
+          flower.className = `flower ${content.flower}`;
+          flower.textContent = FLOWER_ICONS[content.flower];
+          cell.appendChild(flower);
+        }
+      }
+      
+      board.appendChild(cell);
+    }
+  }
+  
+  renderRoseBlocks();
+}
+
+function renderRoseBlocks() {
+  const board = document.getElementById('board');
+  const season = getCurrentSeason();
+  
+  gameState.placedFlowers.forEach(f => {
+    if (f.flower === 'rose') {
+      const diagonals = [
+        {dr: -1, dc: -1}, {dr: -1, dc: 1},
+        {dr: 1, dc: -1}, {dr: 1, dc: 1}
+      ];
+      diagonals.forEach(d => {
+        const nr = f.r + d.dr;
+        const nc = f.c + d.dc;
+        if (nr >= 0 && nr < 10 && nc >= 0 && nc < 10) {
+          const cellIndex = nr * 10 + nc;
+          const cell = board.children[cellIndex];
+          const block = document.createElement('div');
+          block.className = 'rose-block';
+          cell.appendChild(block);
+        }
+      });
+    }
+    
+    // Summer: sunflowers block adjacent squares
+    if (season === 'summer' && f.flower === 'sunflower') {
+      const adjacents = [
+        {dr: -1, dc: 0}, {dr: 1, dc: 0},
+        {dr: 0, dc: -1}, {dr: 0, dc: 1}
+      ];
+      adjacents.forEach(a => {
+        const nr = f.r + a.dr;
+        const nc = f.c + a.dc;
+        if (nr >= 0 && nr < 10 && nc >= 0 && nc < 10) {
+          const cellIndex = nr * 10 + nc;
+          const cell = board.children[cellIndex];
+          const block = document.createElement('div');
+          block.className = 'sunflower-block';
+          cell.appendChild(block);
+        }
+      });
+    }
+  });
+}
+
+function handleCellClick(r, c) {
+  if (gameState.gameOver) return;
+  
+  // In AI mode, block clicks when it's AI's turn
+  if (gameState.currentPlayer === 2 && gameState.vsAI) return;
+  
+  if (gameState.phase === 'select') {
+    const content = gameState.board[r][c];
+    if (content && content.type === 'gardener' && content.player === gameState.currentPlayer) {
+      gameState.selectedGardener = {r, c};
+      gameState.phase = 'move';
+      highlightLegalMoves(r, c);
+      updateStatus();
+    }
+  } else if (gameState.phase === 'move') {
+    const content = gameState.board[r][c];
+    if (content && content.type === 'gardener' && content.player === gameState.currentPlayer) {
+      // Allow switching to different gardener
+      gameState.selectedGardener = {r, c};
+      highlightLegalMoves(r, c);
+      updateStatus();
+    } else if (isLegalMove(gameState.selectedGardener.r, gameState.selectedGardener.c, r, c)) {
+      gameState.moveFrom = {r: gameState.selectedGardener.r, c: gameState.selectedGardener.c};
+      moveGardener(gameState.selectedGardener.r, gameState.selectedGardener.c, r, c);
+      gameState.selectedGardener = {r, c};
+      gameState.phase = 'plant';
+      clearHighlights();
+      updateStatus();
+      showFlowerSelector();
+    }
+  } else if (gameState.phase === 'wildflower-placement') {
+    if (isValidWildflowerPlacement(r, c)) {
+      placeFlower(r, c, gameState.pendingFlower);
+      gameState.phase = 'select';
+      gameState.pendingFlower = null;
+      clearHighlights();
+      endTurn();
+    }
+  } else if (gameState.phase === 'fountain') {
+    const content = gameState.board[r][c];
+    if (content && content.type === 'gardener' && content.player === gameState.currentPlayer) {
+      gameState.selectedGardener = {r, c};
+      gameState.phase = 'fountain-move';
+      highlightFountainMoves(r, c);
+      updateStatus();
+    }
+  } else if (gameState.phase === 'fountain-move') {
+    if (isValidFountainMove(r, c)) {
+      moveGardener(gameState.selectedGardener.r, gameState.selectedGardener.c, r, c);
+      gameState.features.fountain.used[gameState.currentPlayer] = true;
+      gameState.selectedGardener = null;
+      gameState.phase = 'select';
+      clearHighlights();
+      updateFeatureButtons();
+      endTurn();
+    }
+  }
+}
+
+function highlightLegalMoves(r, c) {
+  clearHighlights();
+  const board = document.getElementById('board');
+  
+  for (let tr = 0; tr < 10; tr++) {
+    for (let tc = 0; tc < 10; tc++) {
+      if (isLegalMove(r, c, tr, tc)) {
+        const cellIndex = tr * 10 + tc;
+        board.children[cellIndex].classList.add('legal-move');
+      }
+    }
+  }
+  
+  const cellIndex = r * 10 + c;
+  board.children[cellIndex].classList.add('selected');
+}
+
+function clearHighlights() {
+  const cells = document.querySelectorAll('.cell');
+  cells.forEach(cell => {
+    cell.classList.remove('legal-move', 'selected');
+  });
+}
+
+function isLegalMove(fromR, fromC, toR, toC) {
+  if (toR < 0 || toR > 9 || toC < 0 || toC > 9) return false;
+  if (fromR === toR && fromC === toC) return false;
+  
+  const target = gameState.board[toR][toC];
+  if (target !== null) return false;
+  
+  if (isRoseBlocked(toR, toC)) return false;
+  if (isSunflowerBlocked(toR, toC)) return false;
+  
+  const rowDiff = toR - fromR;
+  const colDiff = toC - fromC;
+  
+  if (rowDiff !== 0 && colDiff !== 0 && Math.abs(rowDiff) !== Math.abs(colDiff)) return false;
+  
+  const steps = Math.max(Math.abs(rowDiff), Math.abs(colDiff));
+  const rowStep = rowDiff === 0 ? 0 : rowDiff / steps;
+  const colStep = colDiff === 0 ? 0 : colDiff / steps;
+  
+  for (let i = 1; i < steps; i++) {
+    const checkR = fromR + rowStep * i;
+    const checkC = fromC + colStep * i;
+    if (gameState.board[checkR][checkC] !== null) return false;
+    if (isRoseBlocked(checkR, checkC)) return false;
+    if (isSunflowerBlocked(checkR, checkC)) return false;
+  }
+  
+  return true;
+}
+
+function isRoseBlocked(r, c) {
+  // In winter (turn 25+), can jump over rose bushes
+  if (getCurrentSeason() === 'winter') return false;
+  
+  const diagonals = [
+    {dr: -1, dc: -1}, {dr: -1, dc: 1},
+    {dr: 1, dc: -1}, {dr: 1, dc: 1}
+  ];
+  
+  for (let d of diagonals) {
+    const checkR = r + d.dr;
+    const checkC = r + d.dc;
+    if (checkR >= 0 && checkR < 10 && checkC >= 0 && checkC < 10) {
+      const content = gameState.board[checkR][checkC];
+      if (content && content.type === 'flower' && content.flower === 'rose') {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function isSunflowerBlocked(r, c) {
+  // In summer (turns 9-16), sunflowers block adjacent squares
+  if (getCurrentSeason() !== 'summer') return false;
+  
+  const adjacents = [
+    {dr: -1, dc: 0}, {dr: 1, dc: 0},
+    {dr: 0, dc: -1}, {dr: 0, dc: 1}
+  ];
+  
+  for (let a of adjacents) {
+    const checkR = r + a.dr;
+    const checkC = r + a.dc;
+    if (checkR >= 0 && checkR < 10 && checkC >= 0 && checkC < 10) {
+      const content = gameState.board[checkR][checkC];
+      if (content && content.type === 'flower' && content.flower === 'sunflower') {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function moveGardener(fromR, fromC, toR, toC) {
+  gameState.board[toR][toC] = gameState.board[fromR][fromC];
+  gameState.board[fromR][fromC] = null;
+  
+  const gardenerList = gameState.gardeners[gameState.currentPlayer];
+  const gIndex = gardenerList.findIndex(g => g.r === fromR && g.c === fromC);
+  gardenerList[gIndex] = {r: toR, c: toC};
+  
+  renderBoard();
+}
+
+function showFlowerSelector() {
+  const selector = document.getElementById('flowerSelector');
+  const options = document.getElementById('flowerOptions');
+  options.innerHTML = '';
+  
+  const currentFlowers = gameState.flowers[gameState.currentPlayer];
+  const usingCompost = gameState.level === 'advanced' && gameState.features.compost.count[gameState.currentPlayer] > 0;
+  
+  const availableFlowers = Object.keys(currentFlowers).filter(type => {
+    return currentFlowers[type] > 0 || usingCompost;
+  });
+  
+  if (availableFlowers.length === 0) {
+    gameState.gameOver = true;
+    const winner = gameState.currentPlayer === 1 ? 2 : 1;
+    setTimeout(() => showEndGame(winner), 500);
+    return;
+  }
+  
+  Object.keys(FLOWER_TYPES).forEach(key => {
+    const type = FLOWER_TYPES[key];
+    const count = currentFlowers[type] || 0;
+    
+    // Skip flowers not available in beginner level
+    if (gameState.level === 'beginner' && (type === 'lily' || type === 'wildflower')) {
+      return;
+    }
+    
+    const option = document.createElement('div');
+    option.className = 'flower-option';
+    if (count === 0 && !usingCompost) option.classList.add('disabled');
+    
+    const icon = document.createElement('div');
+    icon.className = `flower-icon ${type}`;
+    icon.textContent = FLOWER_ICONS[type];
+    
+    const info = document.createElement('div');
+    let displayText = `<strong>${FLOWER_NAMES[type]}</strong><br>${count} left`;
+    if (count === 0 && usingCompost) {
+      displayText = `<strong>${FLOWER_NAMES[type]}</strong><br>Compost!`;
+    }
+    info.innerHTML = displayText;
+    
+    option.appendChild(icon);
+    option.appendChild(info);
+    
+    if (count > 0 || usingCompost) {
+      option.onclick = () => selectFlower(type);
+    }
+    
+    options.appendChild(option);
+  });
+  
+  selector.style.display = 'block';
+}
+
+function selectFlower(type) {
+  document.getElementById('flowerSelector').style.display = 'none';
+  
+  const season = getCurrentSeason();
+  const isFlexiblePlacement = type === 'wildflower' || season === 'autumn';
+  
+  if (isFlexiblePlacement) {
+    gameState.pendingFlower = type;
+    gameState.phase = 'wildflower-placement';
+    highlightWildflowerOptions();
+    updateStatus();
+  } else {
+    const r = gameState.moveFrom.r;
+    const c = gameState.moveFrom.c;
+    
+    // Check scarecrow constraint
+    if (gameState.features.scarecrow.active && !isValidScarecrowPlacement(r, c)) {
+      alert('Scarecrow active! You must place flower 3+ squares from all your gardeners.');
+      showFlowerSelector();
+      return;
+    }
+    
+    placeFlower(r, c, type);
+    gameState.phase = 'select';
+    endTurn();
+  }
+}
+
+function highlightWildflowerOptions() {
+  clearHighlights();
+  const board = document.getElementById('board');
+  
+  // FROM square is always an option (if scarecrow allows it)
+  if (!gameState.features.scarecrow.active || isValidScarecrowPlacement(gameState.moveFrom.r, gameState.moveFrom.c)) {
+    const cellIndex = gameState.moveFrom.r * 10 + gameState.moveFrom.c;
+    board.children[cellIndex].classList.add('legal-move');
+  }
+  
+  const currentGardener = gameState.gardeners[gameState.currentPlayer].find(g => 
+    g.r === gameState.selectedGardener.r && g.c === gameState.selectedGardener.c
+  );
+  
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      if (dr === 0 && dc === 0) continue;
+      const nr = currentGardener.r + dr;
+      const nc = currentGardener.c + dc;
+      if (nr >= 0 && nr < 10 && nc >= 0 && nc < 10 && gameState.board[nr][nc] === null) {
+        // Check scarecrow constraint
+        if (gameState.features.scarecrow.active && !isValidScarecrowPlacement(nr, nc)) {
+          continue;
+        }
+        const idx = nr * 10 + nc;
+        board.children[idx].classList.add('legal-move');
+      }
+    }
+  }
+}
+
+function isValidWildflowerPlacement(r, c) {
+  // FROM square is always valid
+  if (r === gameState.moveFrom.r && c === gameState.moveFrom.c) {
+    // Check scarecrow constraint
+    if (gameState.features.scarecrow.active) {
+      return isValidScarecrowPlacement(r, c);
+    }
+    return true;
+  }
+  
+  // Other squares must be empty
+  if (gameState.board[r][c] !== null) return false;
+  
+  // Check scarecrow constraint
+  if (gameState.features.scarecrow.active) {
+    if (!isValidScarecrowPlacement(r, c)) return false;
+  }
+  
+  // Must be adjacent to current gardener position
+  const currentGardener = gameState.gardeners[gameState.currentPlayer].find(g => 
+    g.r === gameState.selectedGardener.r && g.c === gameState.selectedGardener.c
+  );
+  
+  const dr = Math.abs(r - currentGardener.r);
+  const dc = Math.abs(c - currentGardener.c);
+  return dr <= 1 && dc <= 1;
+}
+
+function isValidScarecrowPlacement(r, c) {
+  // Must be at least 3 squares away from all own gardeners
+  const gardeners = gameState.gardeners[gameState.currentPlayer];
+  for (let g of gardeners) {
+    const distance = Math.max(Math.abs(r - g.r), Math.abs(c - g.c));
+    if (distance < 3) return false;
+  }
+  return true;
+}
+
+function highlightFountainMoves(r, c) {
+  clearHighlights();
+  const board = document.getElementById('board');
+  const centerR = 5, centerC = 5;
+  
+  for (let tr = 0; tr < 10; tr++) {
+    for (let tc = 0; tc < 10; tc++) {
+      if (isValidFountainMove(tr, tc)) {
+        const cellIndex = tr * 10 + tc;
+        board.children[cellIndex].classList.add('legal-move');
+      }
+    }
+  }
+  
+  const cellIndex = r * 10 + c;
+  board.children[cellIndex].classList.add('selected');
+}
+
+function isValidFountainMove(r, c) {
+  // Must be empty
+  if (gameState.board[r][c] !== null) return false;
+  
+  // Must be within 2 spaces of center (5,5)
+  const centerR = 5, centerC = 5;
+  const distance = Math.max(Math.abs(r - centerR), Math.abs(c - centerC));
+  return distance <= 2;
+}
+
+function placeFlower(r, c, type) {
+  gameState.board[r][c] = {
+    type: 'flower',
+    flower: type,
+    player: gameState.currentPlayer
+  };
+  
+  gameState.placedFlowers.push({
+    r, c, flower: type, player: gameState.currentPlayer
+  });
+  
+  // Handle compost bin usage
+  if (gameState.level === 'advanced' && gameState.features.compost.count[gameState.currentPlayer] > 0) {
+    gameState.features.compost.count[gameState.currentPlayer]--;
+    if (gameState.features.compost.count[gameState.currentPlayer] === 0) {
+      updateFeatureButtons();
+    }
+  } else {
+    gameState.flowers[gameState.currentPlayer][type]--;
+  }
+  
+  renderBoard();
+  updateInventory();
+}
+
+function endTurn() {
+  if (checkGameOver()) {
+    return;
+  }
+  
+  gameState.turnCount++;
+  gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
+  gameState.selectedGardener = null;
+  gameState.moveFrom = null;
+  gameState.features.scarecrow.active = false;
+  
+  updateStatus();
+  updateInventory();
+  
+  if (gameState.currentPlayer === 2 && gameState.vsAI) {
+    setTimeout(aiTurn, 1000);
+  }
+}
+
+function checkGameOver() {
+  const nextPlayer = gameState.currentPlayer === 1 ? 2 : 1;
+  
+  if (!hasAnyLegalMoves(nextPlayer)) {
+    gameState.gameOver = true;
+    showEndGame(gameState.currentPlayer);
+    return true;
+  }
+  
+  return false;
+}
+
+function hasAnyLegalMoves(player) {
+  const gardeners = gameState.gardeners[player];
+  
+  for (let g of gardeners) {
+    for (let r = 0; r < 10; r++) {
+      for (let c = 0; c < 10; c++) {
+        if (isLegalMove(g.r, g.c, r, c)) {
+          return true;
+        }
+      }
+    }
+  }
+  
+  return false;
+}
+
+function aiTurn() {
+  document.getElementById('aiThinking').style.display = 'block';
+  
+  setTimeout(() => {
+    const move = findBestMove();
+    
+    if (move) {
+      gameState.moveFrom = {r: move.fromR, c: move.fromC};
+      moveGardener(move.fromR, move.fromC, move.toR, move.toC);
+      
+      setTimeout(() => {
+        placeFlower(move.flowerR, move.flowerC, move.flowerType);
+        document.getElementById('aiThinking').style.display = 'none';
+        gameState.phase = 'select';
+        endTurn();
+      }, 500);
+    } else {
+      document.getElementById('aiThinking').style.display = 'none';
+      gameState.gameOver = true;
+      showEndGame(1);
+    }
+  }, 1500);
+}
+
+function findBestMove() {
+  const gardeners = gameState.gardeners[2];
+  let bestMove = null;
+  let bestScore = -Infinity;
+  
+  for (let g of gardeners) {
+    for (let r = 0; r < 10; r++) {
+      for (let c = 0; c < 10; c++) {
+        if (isLegalMove(g.r, g.c, r, c)) {
+          const flowerTypes = Object.keys(FLOWER_TYPES)
+            .map(k => FLOWER_TYPES[k])
+            .filter(type => gameState.flowers[2][type] > 0);
+          
+          for (let flowerType of flowerTypes) {
+            const season = getCurrentSeason();
+            let flowerPlacements = [{r: g.r, c: g.c}];
+            
+            // Autumn: all flowers can be placed flexibly, Wildflowers always flexible
+            if (flowerType === 'wildflower' || season === 'autumn') {
+              flowerPlacements = [{r: g.r, c: g.c}];
+              for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                  if (dr === 0 && dc === 0) continue;
+                  const nr = r + dr;
+                  const nc = c + dc;
+                  if (nr >= 0 && nr < 10 && nc >= 0 && nc < 10) {
+                    if (gameState.board[nr][nc] === null && !(nr === g.r && nc === g.c)) {
+                      flowerPlacements.push({r: nr, c: nc});
+                    }
+                  }
+                }
+              }
+            }
+            
+            // Filter placements by scarecrow constraint
+            if (gameState.features.scarecrow.active) {
+              flowerPlacements = flowerPlacements.filter(fp => isValidScarecrowPlacement(fp.r, fp.c));
+            }
+            
+            for (let fp of flowerPlacements) {
+              const score = evaluateMove(g.r, g.c, r, c, fp.r, fp.c, flowerType);
+              if (score > bestScore) {
+                bestScore = score;
+                bestMove = {
+                  fromR: g.r, fromC: g.c,
+                  toR: r, toC: c,
+                  flowerR: fp.r, flowerC: fp.c,
+                  flowerType: flowerType
+                };
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  return bestMove;
+}
+
+function evaluateMove(fromR, fromC, toR, toC, flowerR, flowerC, flowerType) {
+  let score = 0;
+  
+  const centerDist = Math.abs(toR - 4.5) + Math.abs(toC - 4.5);
+  score -= centerDist * 2;
+  
+  const savedState = JSON.parse(JSON.stringify(gameState));
+  
+  gameState.board[toR][toC] = gameState.board[fromR][fromC];
+  gameState.board[fromR][fromC] = null;
+  gameState.board[flowerR][flowerC] = {type: 'flower', flower: flowerType, player: 2};
+  
+  const gIndex = gameState.gardeners[2].findIndex(g => g.r === fromR && g.c === fromC);
+  if (gIndex !== -1) {
+    gameState.gardeners[2][gIndex] = {r: toR, c: toC};
+  }
+  
+  gameState.placedFlowers.push({r: flowerR, c: flowerC, flower: flowerType, player: 2});
+  
+  if (flowerType === 'rose') {
+    score += 15;
+  }
+  
+  const myMoves = countMovesForPlayer(2);
+  const oppMoves = countMovesForPlayer(1);
+  score += myMoves * 5;
+  score -= oppMoves * 8;
+  
+  gameState = JSON.parse(JSON.stringify(savedState));
+  
+  score += Math.random() * 10;
+  
+  return score;
+}
+
+function countMovesForPlayer(player) {
+  let count = 0;
+  const gardeners = gameState.gardeners[player];
+  
+  for (let g of gardeners) {
+    for (let r = 0; r < 10; r++) {
+      for (let c = 0; c < 10; c++) {
+        if (isLegalMove(g.r, g.c, r, c)) {
+          count++;
+        }
+      }
+    }
+  }
+  
+  return count;
+}
+
+function updateStatus() {
+  const status = document.getElementById('status');
+  const playerName = gameState.vsAI && gameState.currentPlayer === 2 ? 'AI' : `Player ${gameState.currentPlayer}`;
+  
+  let statusText = '';
+  
+  if (gameState.phase === 'select') {
+    statusText = `${playerName}'s Turn - Select Gardener`;
+  } else if (gameState.phase === 'move') {
+    statusText = `${playerName}'s Turn - Choose Destination`;
+  } else if (gameState.phase === 'plant') {
+    statusText = `${playerName}'s Turn - Select Flower`;
+  } else if (gameState.phase === 'wildflower-placement') {
+    const season = getCurrentSeason();
+    if (season === 'autumn') {
+      statusText = `${playerName}'s Turn - Place Flower (Autumn)`;
+    } else {
+      statusText = `${playerName}'s Turn - Place Wildflower`;
+    }
+  } else if (gameState.phase === 'fountain') {
+    statusText = `${playerName}'s Turn - Select Gardener for Fountain`;
+  } else if (gameState.phase === 'fountain-move') {
+    statusText = `${playerName}'s Turn - Teleport to Fountain Area`;
+  }
+  
+  // Add season indicator for advanced mode
+  if (gameState.level === 'advanced') {
+    const season = getCurrentSeason();
+    const seasonEmojis = {
+      spring: '🌱',
+      summer: '☀️',
+      autumn: '🍂',
+      winter: '❄️'
+    };
+    const seasonNames = {
+      spring: 'Spring',
+      summer: 'Summer',
+      autumn: 'Autumn',
+      winter: 'Winter'
+    };
+    statusText += ` | ${seasonEmojis[season]} ${seasonNames[season]} (Turn ${gameState.turnCount + 1})`;
+  }
+  
+  status.textContent = statusText;
+}
+
+function updateInventory() {
+  const counts = document.getElementById('flowerCounts');
+  counts.innerHTML = '';
+  
+  const currentFlowers = gameState.flowers[gameState.currentPlayer];
+  
+  // Update inventory title
+  const inventoryTitle = document.querySelector('#inventory h3');
+  if (inventoryTitle) {
+    const playerName = gameState.vsAI && gameState.currentPlayer === 2 ? 'AI' : `Player ${gameState.currentPlayer}`;
+    inventoryTitle.textContent = `${playerName}'s Flowers`;
+  }
+  
+  Object.keys(FLOWER_TYPES).forEach(key => {
+    const type = FLOWER_TYPES[key];
+    const count = currentFlowers[type];
+    
+    // Skip flowers not available in beginner level
+    if (gameState.level === 'beginner' && (type === 'lily' || type === 'wildflower')) {
+      return;
+    }
+    
+    const item = document.createElement('div');
+    item.className = 'flower-count';
+    
+    const icon = document.createElement('div');
+    icon.className = `flower-icon ${type}`;
+    icon.textContent = FLOWER_ICONS[type];
+    
+    const text = document.createElement('span');
+    text.textContent = `${FLOWER_NAMES[type]}: ${count}`;
+    
+    item.appendChild(icon);
+    item.appendChild(text);
+    counts.appendChild(item);
+  });
+}
+
+function showEndGame(winner) {
+  const modal = document.getElementById('endGameModal');
+  const winnerText = document.getElementById('winnerText');
+  const scoreBreakdown = document.getElementById('scoreBreakdown');
+  
+  const winnerName = gameState.vsAI && winner === 2 ? 'AI' : `Player ${winner}`;
+  winnerText.textContent = `${winnerName} Wins! 🎉`;
+  
+  const scores = calculateScores(winner);
+  
+  let html = '<div class="final-scores">';
+  html += `<div class="player-score"><h3>Player 1</h3><div class="score">${scores.p1.total}</div></div>`;
+  const p2Name = gameState.vsAI ? 'AI' : 'Player 2';
+  html += `<div class="player-score"><h3>${p2Name}</h3><div class="score">${scores.p2.total}</div></div>`;
+  html += '</div>';
+  
+  html += '<div class="score-section"><h3>Player 1 Breakdown</h3>';
+  html += `<div class="score-item"><span>Base Flowers:</span><span>${scores.p1.base}</span></div>`;
+  html += `<div class="score-item"><span>Connected Groups:</span><span>+${scores.p1.connected}</span></div>`;
+  html += `<div class="score-item"><span>Rainbow Gardens:</span><span>+${scores.p1.rainbow}</span></div>`;
+  html += `<div class="score-item"><span>Winner Bonus:</span><span>+${scores.p1.winner}</span></div>`;
+  html += `<div class="score-item"><span>Mobile Gardeners:</span><span>+${scores.p1.mobile}</span></div>`;
+  html += '</div>';
+  
+  html += `<div class="score-section"><h3>${p2Name} Breakdown</h3>`;
+  html += `<div class="score-item"><span>Base Flowers:</span><span>${scores.p2.base}</span></div>`;
+  html += `<div class="score-item"><span>Connected Groups:</span><span>+${scores.p2.connected}</span></div>`;
+  html += `<div class="score-item"><span>Rainbow Gardens:</span><span>+${scores.p2.rainbow}</span></div>`;
+  html += `<div class="score-item"><span>Winner Bonus:</span><span>+${scores.p2.winner}</span></div>`;
+  html += `<div class="score-item"><span>Mobile Gardeners:</span><span>+${scores.p2.mobile}</span></div>`;
+  html += '</div>';
+  
+  scoreBreakdown.innerHTML = html;
+  modal.classList.add('show');
+}
+
+function calculateScores(winner) {
+  const scores = {
+    p1: { base: 0, connected: 0, rainbow: 0, winner: 0, mobile: 0, total: 0 },
+    p2: { base: 0, connected: 0, rainbow: 0, winner: 0, mobile: 0, total: 0 }
+  };
+  
+  const p1Flowers = gameState.placedFlowers.filter(f => f.player === 1);
+  const p2Flowers = gameState.placedFlowers.filter(f => f.player === 2);
+  
+  scores.p1.base = p1Flowers.length;
+  scores.p2.base = p2Flowers.length;
+  
+  scores.p1.connected = calculateConnectedBonus(p1Flowers);
+  scores.p2.connected = calculateConnectedBonus(p2Flowers);
+  
+  scores.p1.rainbow = calculateRainbowBonus(p1Flowers);
+  scores.p2.rainbow = calculateRainbowBonus(p2Flowers);
+  
+  scores[`p${winner}`].winner = 25;
+  
+  scores.p1.mobile = countMobileGardeners(1) * 3;
+  scores.p2.mobile = countMobileGardeners(2) * 3;
+  
+  scores.p1.total = scores.p1.base + scores.p1.connected + scores.p1.rainbow + scores.p1.winner + scores.p1.mobile;
+  scores.p2.total = scores.p2.base + scores.p2.connected + scores.p2.rainbow + scores.p2.winner + scores.p2.mobile;
+  
+  return scores;
+}
+
+function calculateConnectedBonus(flowers) {
+  const visited = new Set();
+  let bonus = 0;
+  
+  const groups = {};
+  Object.keys(FLOWER_TYPES).forEach(k => groups[FLOWER_TYPES[k]] = []);
+  flowers.forEach(f => groups[f.flower].push(f));
+  
+  Object.keys(groups).forEach(type => {
+    const typeFlowers = groups[type];
+    
+    typeFlowers.forEach(flower => {
+      const key = `${flower.r},${flower.c}`;
+      if (!visited.has(key)) {
+        const groupSize = exploreGroup(flower, typeFlowers, visited);
+        bonus += groupSize;
+      }
+    });
+  });
+  
+  return bonus;
+}
+
+function exploreGroup(start, flowers, visited) {
+  const stack = [start];
+  const key = `${start.r},${start.c}`;
+  visited.add(key);
+  let size = 1;
+  
+  while (stack.length > 0) {
+    const current = stack.pop();
+    
+    const neighbors = [
+      {r: current.r-1, c: current.c},
+      {r: current.r+1, c: current.c},
+      {r: current.r, c: current.c-1},
+      {r: current.r, c: current.c+1}
+    ];
+    
+    neighbors.forEach(n => {
+      const nKey = `${n.r},${n.c}`;
+      if (!visited.has(nKey)) {
+        const match = flowers.find(f => f.r === n.r && f.c === n.c);
+        if (match) {
+          visited.add(nKey);
+          stack.push(match);
+          size++;
+        }
+      }
+    });
+  }
+  
+  return size;
+}
+
+function calculateRainbowBonus(flowers) {
+  let count = 0;
+  
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const area = [
+        {r, c}, {r, c: c+1},
+        {r: r+1, c}, {r: r+1, c: c+1}
+      ];
+      
+      const types = new Set();
+      let allMatch = true;
+      
+      area.forEach(pos => {
+        const flower = flowers.find(f => f.r === pos.r && f.c === pos.c);
+        if (flower) {
+          types.add(flower.flower);
+        } else {
+          allMatch = false;
+        }
+      });
+      
+      if (allMatch && types.size === 4) {
+        count += 10;
+      }
+    }
+  }
+  
+  return count;
+}
+
+function countMobileGardeners(player) {
+  let count = 0;
+  const gardeners = gameState.gardeners[player];
+  
+  gardeners.forEach(g => {
+    for (let r = 0; r < 10; r++) {
+      for (let c = 0; c < 10; c++) {
+        if (isLegalMove(g.r, g.c, r, c)) {
+          count++;
+          return;
+        }
+      }
+    }
+  });
+  
+  return count;
+}
+
+function updateFeatureButtons() {
+  if (gameState.level !== 'advanced') return;
+  
+  const player = gameState.currentPlayer;
+  
+  const fountainBtn = document.getElementById('fountainBtn');
+  const compostBtn = document.getElementById('compostBtn');
+  const scarecrowBtn = document.getElementById('scarecrowBtn');
+  
+  if (fountainBtn) {
+    fountainBtn.classList.toggle('used', gameState.features.fountain.used[player]);
+  }
+  if (compostBtn) {
+    compostBtn.classList.toggle('used', gameState.features.compost.used[player]);
+  }
+  if (scarecrowBtn) {
+    scarecrowBtn.classList.toggle('used', gameState.features.scarecrow.used[player]);
+  }
+}
+
+function useFeature(feature) {
+  if (gameState.level !== 'advanced') return;
+  if (gameState.phase !== 'select') return;
+  if (gameState.currentPlayer === 2 && gameState.vsAI) return;
+  
+  const player = gameState.currentPlayer;
+  
+  if (gameState.features[feature].used[player]) {
+    alert('You have already used this feature!');
+    return;
+  }
+  
+  if (feature === 'fountain') {
+    gameState.phase = 'fountain';
+    alert('Select one of your gardeners, then select a destination within 2 spaces of the center (5,5)');
+  } else if (feature === 'compost') {
+    gameState.features.compost.used[player] = true;
+    gameState.features.compost.count[player] = 2;
+    alert('Your next 2 flowers can be ANY type (even if depleted)!');
+    updateFeatureButtons();
+  } else if (feature === 'scarecrow') {
+    gameState.features.scarecrow.used[player] = true;
+    gameState.features.scarecrow.active = true;
+    alert('Opponent must place their next flower 3+ squares from all their gardeners!');
+    updateFeatureButtons();
+  }
+}
+
+function newGame() {
+  document.getElementById('endGameModal').classList.remove('show');
+  const currentMode = gameState.vsAI;
+  initGame();
+  gameState.vsAI = currentMode;
+}
+
+function setGameMode(mode) {
+  gameState.vsAI = (mode === 'ai');
+  
+  // Update button states
+  document.getElementById('aiMode').classList.toggle('active', mode === 'ai');
+  document.getElementById('pvpMode').classList.toggle('active', mode === 'pvp');
+  
+  // Restart game with new mode
+  initGame();
+}
+
+function setLevel(level) {
+  gameState.level = level;
+  
+  // Update button states
+  document.getElementById('beginnerLevel').classList.toggle('active', level === 'beginner');
+  document.getElementById('standardLevel').classList.toggle('active', level === 'standard');
+  document.getElementById('advancedLevel').classList.toggle('active', level === 'advanced');
+  
+  // Restart game with new level
+  initGame();
+}
+
+function showRules() {
+  const modal = document.getElementById('rulesModal');
+  const rulesContent = modal.querySelector('.rules');
+  
+  let html = '<h4>Game Modes</h4>';
+  html += '<p><strong>vs Computer:</strong> Play against the AI opponent<br>';
+  html += '<strong>vs Player:</strong> Play with a friend on the same device</p>';
+  
+  html += '<h4>Difficulty Levels</h4>';
+  html += '<p><strong>Beginner:</strong> Sunflowers and Rose Bushes only<br>';
+  html += '<strong>Standard:</strong> All four flower types<br>';
+  html += '<strong>Advanced:</strong> All flowers plus special features</p>';
+  
+  html += '<h4>Objective</h4>';
+  html += '<p>Move your gardeners and plant flowers strategically. Force your opponent to run out of moves to win!</p>';
+  
+  html += '<h4>Your Turn (3 Steps)</h4>';
+  html += '<ul>';
+  html += '<li><strong>MOVE:</strong> Click your gardener, then click an empty square to move (like a chess queen - any straight line)</li>';
+  html += '<li><strong>PLANT:</strong> Choose a flower type to place on the square you moved FROM</li>';
+  html += '<li><strong>END:</strong> Your turn ends automatically</li>';
+  html += '</ul>';
+  
+  html += '<h4>Flower Types</h4>';
+  html += '<ul>';
+  html += '<li><strong>🌻 Sunflower:</strong> Blocks its square';
+  if (gameState.level === 'advanced') {
+    html += ' (Blocks +4 adjacent squares during Summer: turns 9-16)';
+  }
+  html += '</li>';
+  html += '<li><strong>🌹 Rose Bush:</strong> Blocks its square + 4 diagonals';
+  if (gameState.level === 'advanced') {
+    html += ' (Can jump over them in Winter: turn 25+)';
+  }
+  html += '</li>';
+  
+  if (gameState.level !== 'beginner') {
+    html += '<li><strong>💧 Lily Pond:</strong> Blocks its square</li>';
+    html += '<li><strong>🌈 Wildflower:</strong> Place on FROM square OR any empty adjacent square</li>';
+  }
+  html += '</ul>';
+  
+  if (gameState.level === 'advanced') {
+    html += '<h4>Seasons (Advanced)</h4>';
+    html += '<ul>';
+    html += '<li><strong>Spring (Turns 1-8):</strong> Normal play</li>';
+    html += '<li><strong>Summer (Turns 9-16):</strong> Sunflowers block their square + 4 adjacent (up/down/left/right)</li>';
+    html += '<li><strong>Autumn (Turns 17-24):</strong> Place flowers on FROM square OR any adjacent to destination</li>';
+    html += '<li><strong>Winter (Turn 25+):</strong> Gardeners can jump over Rose Bushes (but not land on them)</li>';
+    html += '</ul>';
+    
+    html += '<h4>Garden Features (Advanced - Once per game)</h4>';
+    html += '<ul>';
+    html += '<li><strong>⛲ Fountain:</strong> Teleport one gardener to any square within 2 spaces of center (5,5)</li>';
+    html += '<li><strong>🗑️ Compost Bin:</strong> Your next 2 flowers can be ANY type (even if depleted)</li>';
+    html += '<li><strong>🧹 Scarecrow:</strong> Opponent must place next flower 3+ squares from all their gardeners</li>';
+    html += '</ul>';
+  }
+  
+  html += '<h4>Winning</h4>';
+  html += '<p>When a player cannot move any gardener, they lose. The player who can still move wins!</p>';
+  
+  html += '<h4>Scoring</h4>';
+  html += '<ul>';
+  html += '<li>Each flower: 1 point</li>';
+  html += '<li>Connected groups: +1 per flower in group</li>';
+  if (gameState.level !== 'beginner') {
+    html += '<li>Rainbow 2×2 (all 4 types): +10</li>';
+  }
+  html += '<li>Winner: +25</li>';
+  html += '<li>Mobile gardeners: +3 each</li>';
+  html += '</ul>';
+  
+  rulesContent.innerHTML = html;
+  modal.classList.add('show');
+}
+
+function hideRules() {
+  document.getElementById('rulesModal').classList.remove('show');
+}
+
+initGame();
+</script>
+
+</body>
+</html>

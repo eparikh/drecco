@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <head>
+        <!-- <base href="http://cims.nyu.edu/drecco2016/"> -->
+        <script src="js/jquery-2.2.4.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.11/p5.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.11/addons/p5.dom.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.11/addons/p5.sound.min.js"></script>
+        <script src="./script.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.css"/>
+        <link rel="stylesheet" type="text/css" href="css/game.css"/>
+    </head>
+    <body>
+        <div class="container-fluid"> 
+            <h1 class="page-header game-title"> Laser Chess </h1> 
+
+            <div class="information-container col-sm-3">
+                <div class="information col-sm-10">
+                    <h2 class="information-header"> Game information </h2>
+                    <div class="info-form">
+                        <label for="player-1"> Player 1 Name </label>
+                        <input type="text" class="form-control info-input" id="player-1" value="Strawberry">
+                    </div>
+
+                     <div class="info-form">
+                        <label for="player-2"> Player 2 Name </label>
+                        <input type="text" class="form-control info-input" id="player-2" value="Pancake">
+                    </div>
+
+                     <div class="info-form">
+                        <label for="board-size"> Size of Board (n) </label>
+                        <input type="text" class="form-control info-input" id="board-size" value="8">
+                    </div>
+
+                     <div class="info-form">
+                        <label for="bishops"> Number of Bishops (b) </label>
+                        <input type="text" class="form-control info-input" id="bishops" value="5">
+                    </div>
+
+                     <div class="info-form">
+                        <label for="knights"> Number of Knights (k) </label>
+                        <input type="text" class="form-control info-input" id="knights" value="5">
+                    </div>
+                    
+                    <div class="info-form">
+                        <label for="time"> Time Limit for Each Player (t = MM:SS or SS) </label>
+                        <input type="text" class="form-control info-input" id="time" value="5:00">
+                    </div>
+
+                    <div class="info-form">
+                        <label for="turns"> Number of Turns (m) </label>
+                        <input type="text" class="form-control info-input" id="turns" value="50">
+                    </div>
+
+                     <div class="col-sm-12 alert alert-danger alert-dismissable" id="error-container">
+                        <a href="#" class="close" aria-label="close">&times;</a>
+                        <p id="error-message"> </p>
+                    </div>
+                    <div class="btn-container col-sm-12">
+                        <button type="button" class="start-game btn btn-primary" onclick="startGame();">Start new game</button>
+                    </div>
+
+                    <img id="blackbishop" src="assets/blackbishop.png" alt="blackbishop" style="display:none">
+                    <img id="blackknight" src="assets/blackknight.png" alt="blackknight" style="display:none">
+                    <img id="blackking" src="assets/blackking.png" alt="blackking" style="display:none">
+                    <img id="whitebishop" src="assets/whitebishop.png" alt="whitebishop" style="display:none">
+                    <img id="whiteknight" src="assets/whiteknight.png" alt="whiteknight" style="display:none">
+                    <img id="whiteking" src="assets/whiteking.png" alt="whiteking" style="display:none">
+                </div>
+            </div>
+            <div class="game col-sm-9" id='game-container'>
+
+            </div>
+        </div>
+    </body>
+
+    <script>
+        $('.close').on('click', function() {
+            $(this).parent().hide();
+            console.log('worked');
+        });
+
+    </script>
+</html>

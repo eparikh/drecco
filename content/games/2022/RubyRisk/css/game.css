@@ -1,0 +1,105 @@
+html {
+    font-family: sans-serif;
+	font-size: 30px;
+  }
+
+body {
+    background: rgba(0,0,0,.05);
+	font-size: large;
+}
+
+.form input[type="number"] {
+    width: 200px;
+	margin: 1%;
+}
+
+.lastResult {
+    color: white;
+    padding: 3px;
+}
+
+.container-fluid {
+	margin-top: 1%;
+}
+
+.information {
+	background: rgba(0,0,0, .1);
+	border-radius: 10px;
+}
+
+.information-header {
+	margin-bottom: 10%;
+}
+
+#error-container {
+	margin-top: 5%;
+	margin-bottom: 0;
+	border-radius: 10px;
+	display: none;
+}
+
+.game-title {
+	text-align: center;
+}
+
+input.info-input.form-control {
+	border-radius: 10px;
+}
+
+button.start-game {
+	float: right;
+	margin: 5% 0;
+	border-radius: 10px;
+	border: 1px solid rgba(0,0,0,.3);
+}
+
+button.submit-move {
+	position: relative;
+	z-index: 999;
+	margin: 5% 0;
+	border-radius: 10px;
+	border: 1px solid rgba(0,0,0,.3);
+}
+
+.btn-container {
+	overflow: auto;
+}
+
+.game-box {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 0 50px;
+	padding: 30px;
+}
+
+.message {
+	display: flex;
+	flex-wrap: wrap;
+	font-style: italic;
+	font-size: large;
+	font-weight: bold;
+	margin: 0 50px;
+	padding: 10px;
+}
+
+.rubies {
+	display: flex;
+	margin: 0 20px;
+}
+
+.rubies-image {
+	max-width: 25%;
+	margin: 0 4px;
+	height: 2px;
+}
+
+.photo {
+	max-width: 31.333%;
+	padding: 10px 10px;
+	height: 240px;
+}
+
+.photo img {
+	width: 100%;
+	height: 100%;
+}

@@ -1,0 +1,2 @@
+.box{flex-direction:column;font-family:sans-serif;position:fixed;top:50%;left:50%;-webkit-transform:translate(-50%,-50%);transform:translate(-50%,-50%)}.box,.row{display:flex}.tile{height:50px;width:50px;background-color:#ddb033;border-radius:20%;text-align:center;vertical-align:middle;line-height:50px;box-shadow:1px 1px #ae881e;margin-right:3px;margin-bottom:3px}.letter{font-size:40px;display:inline-block;left:4%}.letter,.value{position:relative}.value{font-size:8px;right:-4%;bottom:-5%}
+/*# sourceMappingURL=main.01a7cc5e.chunk.css.map */

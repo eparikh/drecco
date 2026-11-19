@@ -1,17 +1,15 @@
-content/games/*
-!content/games/2023
-!_index.md
-
-content/games/2023/*
-!content/games/2023/_index.md
-!content/games/2023/Gomoku
-!content/games/2023/Gomoku/*
-
+# Build output
 public
 public.zip
 drecco-release.zip
 drecco
 
+# Local tooling
 zola
+zola-*.tar.gz
 mybuild.sh
-cims-build.sh
+
+# OS / download junk
+.DS_Store
+*:Zone.Identifier
+Thumbs.db

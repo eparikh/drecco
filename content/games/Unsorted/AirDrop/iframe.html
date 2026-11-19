@@ -1,0 +1,168 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title> AirDrop </title>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<link href="https://fonts.googleapis.com/css?family=Orbitron:900" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
+<link rel="stylesheet" href="airdrop.css"/>
+
+</head>
+<script src="airdrop.js"></script>
+<body onkeypress="uniCharCode(event)">
+  <div class="container">
+    <div class="row">
+     <!--GAME CONTROLS-->
+      <div class="col-md-3" style="margin-top:30px;">
+        <div class="row" id="header">
+          <h1>AIR DROP </h1>
+        </div>
+        <!--INSTRUCTION-->
+        <div class="row">
+          <div class="panel panel-default">
+            <div class="panel-heading">Instructions</div>
+              <div class="panel-body" id="instruction">
+                <p id="instruction">Click Start Game to begin the game.</p>
+            </div>
+          </div>
+        </div>
+        <!--PARAMETERS-->
+        <div class="row">
+          <h4>Parameters</h4>
+            <ul class="list-group">
+              <li class="list-group-item">Player Turn:  <span id="player-turn"></span></li>
+              <li class="list-group-item">
+                  Radius: 
+                  <div id= "slidecontainer" style="display:flex">
+                    <input type="range" min="10" max="50" value="30" class="slider" id="airdropRadius">
+                    <output id="slidervalue">30</output>
+                  </div>
+                   <!--
+                  <div class="alert alert-info" role="alert" id="slidervalue" style="margin-top: 10px; text-align: center; margin-left: 40%; margin-right: 40%">
+                      45
+                  </div>  
+                  -->       
+              </li>
+              <li class="list-group-item">Supplies Per Drop:  <span id="num-supplies-display"></span></li>
+              <li class="list-group-item">Number of Survivors:  <span id="num-survivors-display"></span></li>
+
+              
+            </ul>
+          <!--<button type="button" class="btn btn-danger">DROP!</button>-->
+        
+        </div>
+          <!--GAME BUTTONS-->
+        <div class="row" style="text-align: center; margin-top: 10px">
+          
+          <button id="start-game" class="btn btn-primary" data-toggle="modal" data-target="#modal-form" onclick="sliderSwitch(0);">Start Game</button>
+          <button id="reset-game" class="btn btn-primary">Reset Game</button>
+        </div>
+
+      </div>
+
+      <!--GAME BOARD-->
+      <div class="col-md-8 col-md-offset-1">
+        <!--SCORES-->
+        <div class="row" style="text-align: center; margin-top: 20px">
+          <h3 >
+            <span id="player1-display"></span>
+            <span class="label label-default" id="player1-score" style="margin-left:3px">0</span> 
+            V.S. 
+            <span class="label label-default" id="player2-score" style="margin-right:3px">0</span>
+            <span id="player2-display"></span>
+          </h3>
+        </div>
+        <!--BOARD-->
+        <div class="row" style="text-align: center; margin-top: 20px", id="canvasParent" >
+          <div class="row" id="innerContainer" style="position: relative;">
+          <canvas id="canvas_mouse" style="position: absolute; z-index: 3; margin-left: auto;" height="800" width="800">
+          </canvas>
+          <canvas id="canvas_numbers" style="position: absolute; z-index: 2; margin-left: auto;" height="800" width="800">
+          </canvas>
+          <canvas id="canvas_people" style="position: absolute; z-index: 1; margin-left: auto;" height="800" width="800">
+          </canvas>
+          <canvas id="canvas_background" style="z-index: 0; margin-left: auto;" height="800" width="800">
+          </canvas>
+        </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+<div class="modal fade" id="modal-form" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <!--MODAL HEADER-->
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Game Info</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <!--MODAL BODY-->
+      <div class="modal-body">
+          <form class="form-horizontal">
+            <b>How to play - </b>
+            <p>Air Drop is a two player strategy game. Each player takes turn dropping supplies to survivors seen within the drop's radius. The radius can be adjusted each turn, and all survivors within the radius will share a fixed amount of supplies equally. A player saves a survivor on the ground when he/she is the last person to fulfill the amount of supplies needed by the survivor. The number of survivors and number of supplies per drop can be customized here:</p>
+            <div class="form-group">
+              <label class="control-label col-sm-4" for="game-mode">Game Mode:</label>
+              <div class="col-sm-8"> 
+                 <select class="browser-default custom-select" id="game-mode">
+                  <option value="" selected="">Human v.s. Human</option>
+                  <option value="robot">Human v.s. Robot</option>
+                 </select>
+              </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-4" for="num-supplies">Supplies Per Drop:</label>
+            <div class="col-sm-8"> 
+              <input class="form-control" id="num-supplies" type="text" placeholder="Default: 30">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-4" for="num-survivors">Number of Survivors:</label>
+            <div class="col-sm-8"> 
+              <input class="form-control" id="num-survivors" type="text" placeholder="Default: 50">
+            </div>
+           </div>
+
+          <div class="form-group">
+            <label class="control-label col-sm-4" for="player1-name">Name:</label>
+            <div class="col-sm-8"> 
+              <input class="form-control" id="player1-name" type="text" placeholder="Default: Player1">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-4 form-hide" for="player2-name">Name:</label>
+            <div class="col-sm-8 form-hide"> 
+              <input class="form-control form-hide" id="player2-name" type="text" placeholder="Default: Player2">
+            </div>
+          </div>
+         
+          </form>
+      </div>
+
+      <!--MODAL FOOTER-->      
+      <div class="modal-footer d-flex justify-content-center">
+        <button class="btn btn-default" id="drawGrid" onclick="sliderSwitch(1);">Let's Go!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+
+</html>

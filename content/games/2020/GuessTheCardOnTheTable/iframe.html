@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <head>
+        <title>Guess the Card on the Table</title>
+        <script src="assets/js/jquery-2.2.4.min.js"></script>
+        <script src="assets/js/script.js"></script>
+        <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.css"/>
+        <link rel="stylesheet" type="text/css" href="assets/css/game.css"/>
+    </head>
+    <body style="max-width: 1100px; margin: auto;">
+        <div class="container-fluid"> 
+            <h1 class="page-header game-title"> Guess the Card on the Table Game </h1> 
+
+            <div class="information-container col-sm-4">
+                <div class="col-sm-1"></div>
+                <div class="information col-sm-10">
+                    <div style='height: 400px'>
+                    <h2 class="information-header"> Game information </h2>
+                    <div class="side-bar-display" id="side_bar">
+                        <div class="info-form">
+                            <label for="player-1"> Player 1 Name </label>
+                            <input type="text" class="form-control info-input" id="player-1">
+                        </div>
+                        <br>
+                        <div class="info-form">
+                            <label for="player-2"> Player 2 Name </label>
+                            <input type="text" class="form-control info-input" id="player-2">
+                        </div>
+                        <br>
+                        <div class="info-form">
+                            <label for="number-of-cards"> Number of Cards</label>
+                            <input type="text" class="form-control info-input" id="number-of-cards" value="5">
+                        </div>
+                    </div>
+                     <div class="col-sm-12 alert alert-danger alert-dismissable" id="error-container">
+                        <a href="#" class="close" aria-label="close">&times;</a>
+                        <p id="error-message"> </p>
+                    </div>
+                    </div>
+                    <div class="btn-container col-sm-12">
+                        <button type="button" class="start-game btn btn-primary" id="start-game-btn">Start new game</button>
+                    </div>
+                </div>
+            </div>
+            <div class="game-container col-sm-8" id='game-container'>
+                <div class="game col-sm-11">
+                    <div class="game-board-display col-sm-12" id="game-board">
+                    </div>
+                    <div class="col-sm-12" id="names-row">
+                    </div>
+                    <div class="btn-container col-sm-12" id='game-btn'>
+                        <button type="button" class="next btn btn-primary" id="next-btn">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    <script>
+        $('.close').on('click', function() {
+            $(this).parent().hide();
+        });
+    </script>
+</html>

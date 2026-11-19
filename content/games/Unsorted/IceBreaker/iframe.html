@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="googlebot" content="noindex, nofollow">
+    <script type="text/javascript" src="js/jquery-2.2.4.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/result-light.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+    <title>Ice Breaker</title>
+
+
+    <script type='text/javascript'>
+		var CONST_BLOCK_SIZE = 40;
+		var CONST_MAX_HIT_HIGHLIGHT = 4;
+		var CONST_INTERSECTION_RADIUS = 6;
+		var CONST_PVP = "PvP";
+		var CONST_PVA = "PvA";
+		var CONST_AVP = "AvP";	
+	
+		var bearImage = new Image();		
+		bearImage.src = "pics/polar_bears.png";
+		
+		var iceBlock = new Image();		
+		iceBlock.src = "pics/ice_block.png";
+		
+		var goneIce = new Image();		
+		goneIce.src = "pics/gone_block.png";
+		
+		var willFallBlock = new Image();
+		willFallBlock.src = "pics/blocks_that_will_fall.png";
+		
+		var hitBlock = new Image();
+		hitBlock.src = "pics/blocks_that_will_be_hit.png";
+		
+		var ctx;
+		var gridSize;
+		var maxArrSize;
+		var	playerOneName
+		var	playerTwoName		
+		var rawGridSize;				
+		var stage = 0;
+		var turnNumber = 0;		
+		var bear_rows;
+		var bear_cols;		
+		var bearLocation = [];
+		var currClicked = [];
+		var currFallen = [];
+		var brokenIce = [];
+		var weakIce = [];		
+		var bearLocationLength = -1;		
+		var board = {};
+		var gameMode = CONST_PVP;
+		var botTurn = -1; //0 is bot goes first, 1 is bot goes second. -1 is no bots.
+		var isBotTurn = false;
+		
+		//this function is used to draw the board
+        function drawBackground(context) {
+            context.beginPath();
+            for (var x = 0; x <= gridSize; x += CONST_BLOCK_SIZE) {
+                context.moveTo(x, 0);
+                context.lineTo(x, gridSize);
+            }
+            for (var x = 0; x <= gridSize; x += CONST_BLOCK_SIZE) {
+                context.moveTo(0, x);
+                context.lineTo(gridSize, x);
+            }
+            context.strokeStyle = "black";
+            context.stroke();
+        }
+        		
+		function getCoordinatesValue(val)
+		{
+			return Math.floor(val / CONST_BLOCK_SIZE);
+		}				
+
+		
+		//this is for turn 1 where player 1 will make the bear placement.
+        function handleClickPhase0(e) {
+			
+            var mouseX = parseInt(e.pageX - offsetX);
+            var mouseY = parseInt(e.pageY - offsetY);
+			
+			var x = getCoordinatesValue(parseInt(e.pageX - offsetX));
+			var y = getCoordinatesValue(parseInt(e.pageY - offsetY));
+						
+			
+			var removeIndex = -1;
+			var currClickedLength = currClicked.length;
+			
+			//if the block clicked was already marked as clicked, this will mark it as not clicked and remove from currClicked
+			for (var i = 0; i < currClickedLength; ++i)
+			{
+				var currClickedLoc = currClicked[i];
+				
+				if (currClickedLoc[0] === x && currClickedLoc[1] === y)
+				{
+					ctx.drawImage(iceBlock, x * CONST_BLOCK_SIZE, y * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);
+					removeIndex = i;
+					break;
+				}
+			}			
+						
+			if (removeIndex >= 0)
+			{
+				currClicked.splice(removeIndex, 1);
+				return;
+			}			
+			
+			if (currClicked.length >= CONST_MAX_HIT_HIGHLIGHT)
+			{
+				alert("You already have selected 4 blocks!");
+				return;
+			}		
+					
+			currClicked.push([x, y]);           
+			ctx.drawImage(hitBlock, x * CONST_BLOCK_SIZE, y * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);
+        }
+				
+		//this is for after turn 1 where players will hit the iceblock.
+		function handleClickPhase1(e) {			
+            var mouseX = parseInt(e.pageX - offsetX);
+            var mouseY = parseInt(e.pageY - offsetY);
+			
+			var x = getCoordinatesValue(parseInt(e.pageX - offsetX));
+			var y = getCoordinatesValue(parseInt(e.pageY - offsetY));
+			
+			//don't do anything if it's bot's turn;
+			if (isBotTurn)
+			{
+				return;
+			}
+			
+			//if bear clicked, don't do anything
+			if(checkIsBearLocation(x, y))
+			{
+				return;
+			}
+					
+			var currClickedLength = currClicked.length;
+			
+			//unselect the original
+			if (currClickedLength > 0)
+			{
+				for (var i = 0; i < currClickedLength; ++i)
+				{
+					var currClickedLoc = currClicked[i];
+					
+					ctx.drawImage(iceBlock, currClickedLoc[0] * CONST_BLOCK_SIZE, currClickedLoc[1] * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);				
+				}
+				
+				currClicked = [];
+			}			
+			
+			var currFallenLength = currFallen.length;
+						
+			//reset the fallen images back to ice block if there were any
+			var redrawBear = false;
+			
+			if (currFallenLength > 0)
+			{
+				for (var i = 0; i < currFallenLength; ++i)
+				{
+					var currFallenBlock = currFallen[i];
+					
+					if (checkIsBearLocation(currFallenBlock[0], currFallenBlock[1]))
+					{
+						redrawBear = true;
+						//ctx.drawImage(bearImage, currFallenBlock[0] * CONST_BLOCK_SIZE, currFallenBlock[1] * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);
+					}
+					else
+					{
+						ctx.drawImage(iceBlock, currFallenBlock[0] * CONST_BLOCK_SIZE, currFallenBlock[1] * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);
+					}
+				}		
+
+				currFallen = [];				
+			}
+						
+			if (redrawBear)
+			{
+				var min_x = gridSize;
+				var min_y = gridSize;
+				var bearLength = bearLocation.length;
+				
+				for (var i = 0; i < bearLength; ++i)
+				{
+					if (bearLocation[i][0] <  min_x)
+					{
+						min_x = bearLocation[i][0];
+					}
+					
+					if (bearLocation[i][1] < min_y)
+					{
+						min_y = bearLocation[i][1];
+					}
+				}
+				
+				ctx.drawImage(bearImage, min_x * CONST_BLOCK_SIZE, min_y * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE * 2, CONST_BLOCK_SIZE * 2);
+			}
+									
+						
+			var lowerX = x * 40;
+			var lowerY = y * 40;
+			var upperX = lowerX + 40;
+			var upperY = lowerY + 40;
+			var currX;
+			var currY;			
+			var containsBearLoc = false;
+			var boardState = board.mask;
+			
+			if ((mouseX - lowerX) <= CONST_INTERSECTION_RADIUS && (mouseY - lowerY) <= CONST_INTERSECTION_RADIUS) //northwest
+			{
+				currX = x - 1;
+				currY = y - 1;
+				
+				if (currX >= 0 && currY >= 0)
+				{
+					if (!checkIsBearLocation(currX, currY))
+					{
+						if (boardState[currY][currX] === 1)
+						{
+							currClicked.push([currX, currY]);	
+						}										
+					}
+					else
+					{
+						currClicked = [];
+						return;
+					}
+				}
+				
+				currX = x;
+				currY = y - 1;
+				
+				if (currY >= 0)
+				{
+					if (!checkIsBearLocation(currX, currY))
+					{
+						if (boardState[currY][currX] === 1)
+						{
+							currClicked.push([currX, currY]);	
+						}						
+					}	
+					else
+					{
+						currClicked = [];
+						return;
+					}					
+				}
+
+				currX = x - 1;
+				currY = y;
+				
+				if (currX >= 0)
+				{
+					if (!checkIsBearLocation(currX, currY))
+					{
+						if (boardState[currY][currX] === 1)
+						{
+							currClicked.push([currX, currY]);	
+						}						
+					}
+					else
+					{
+						currClicked = [];
+						return;
+					}					
+				}
+
+				if (boardState[y][x] === 1)
+				{
+					currClicked.push([x, y]);	
+				}			
+			}
+			else if ((upperX - mouseX) <= CONST_INTERSECTION_RADIUS && (mouseY - lowerY) <= CONST_INTERSECTION_RADIUS) //northeast
+			{
+				currX = x + 1;
+				currY = y - 1;
+				
+				if (currX <= maxArrSize && currY >= 0)
+				{
+					if (!checkIsBearLocation(currX, currY))
+					{
+						if (boardState[currY][currX] === 1)
+						{
+							currClicked.push([currX, currY]);	
+						}							
+					}
+					else
+					{
+						currClicked = [];
+						return;
+					}					
+				}
+				
+				currX = x;
+				currY = y - 1;
+				
+				if (currY >= 0)
+				{
+					if (!checkIsBearLocation(currX, currY))
+					{
+						if (boardState[currY][currX] === 1)
+						{
+							currClicked.push([currX, currY]);	
+						}		
+					}
+					else
+					{
+						currClicked = [];
+						return;
+					}					
+				}
+
+				currX = x + 1;
+				currY = y;
+				
+				if (currX <= maxArrSize)
+				{
+					if (!checkIsBearLocation(currX, currY))
+					{
+						if (boardState[currY][currX] === 1)
+						{
+							currClicked.push([currX, currY]);	
+						}		
+					}
+					else
+					{
+						currClicked = [];
+						return;
+					}					
+				}
+				
+				
+				if (boardState[y][x] === 1)
+				{
+					currClicked.push([x, y]);	
+				}				
+			}
+			else if ((mouseX - lowerX) <= CONST_INTERSECTION_RADIUS && (upperY - mouseY) <= CONST_INTERSECTION_RADIUS) //southwest
+			{
+				currX = x - 1;
+				currY = y + 1;
+				
+				if (currX >= 0 && currY <= maxArrSize)
+				{
+					if (!checkIsBearLocation(currX, currY))
+					{
+						if (boardState[currY][currX] === 1)
+						{
+							currClicked.push([currX, currY]);	
+						}		
+					}
+					else
+					{
+						currClicked = [];
+						return;
+					}					
+				}
+				
+				currX = x;
+				currY = y + 1;
+				
+				if (currY <= maxArrSize)
+				{
+					if (!checkIsBearLocation(currX, currY))
+					{
+						if (boardState[currY][currX] === 1)
+						{
+							currClicked.push([currX, currY]);	
+						}		
+					}
+					else
+					{
+						currClicked = [];
+						return;
+					}					
+				}
+
+				currX = x - 1;
+				currY = y;
+				
+				if (currX <= maxArrSize)
+				{
+					if (!checkIsBearLocation(currX, currY))
+					{
+						if (boardState[currY][currX] === 1)
+						{
+							currClicked.push([currX, currY]);	
+						}		
+					}
+					else
+					{
+						currClicked = [];
+						return;
+					}					
+				}
+
+				if (boardState[y][x] === 1)
+				{
+					currClicked.push([x, y]);	
+				}					
+			}
+			else if ((upperX - mouseX) <= CONST_INTERSECTION_RADIUS && (upperY - mouseY) <= CONST_INTERSECTION_RADIUS) //southeast
+			{
+				currX = x + 1;
+				currY = y + 1;
+				
+				if (currX <= maxArrSize && currY <= maxArrSize)
+				{
+					if (!checkIsBearLocation(currX, currY))
+					{
+						if (boardState[currY][currX] === 1)
+						{
+							currClicked.push([currX, currY]);	
+						}		
+					}
+					else
+					{
+						currClicked = [];
+						return;
+					}					
+				}
+				
+				currX = x;
+				currY = y + 1;
+				
+				if (currY <= maxArrSize)
+				{
+					if (!checkIsBearLocation(currX, currY))
+					{
+						if (boardState[currY][currX] === 1)
+						{
+							currClicked.push([currX, currY]);	
+						}		
+					}
+					else
+					{
+						currClicked = [];
+						return;
+					}					
+				}
+
+				currX = x + 1;
+				currY = y;
+				
+				if (currX <= maxArrSize)
+				{
+					if (!checkIsBearLocation(currX, currY))
+					{
+						if (boardState[currY][currX] === 1)
+						{
+							currClicked.push([currX, currY]);	
+						}		
+					}
+					else
+					{
+						currClicked = [];
+						return;
+					}					
+				}
+				
+				if (boardState[y][x] === 1)
+				{
+					currClicked.push([x, y]);	
+				}		
+			}
+			
+			//now, only north, east, south, and west are possible
+			else if ((mouseX - lowerX) <= CONST_INTERSECTION_RADIUS) //west
+			{
+				currX = x - 1;
+				currY = y;
+				
+				if (currX >= 0)
+				{
+					if (!checkIsBearLocation(currX, currY))
+					{
+						if (boardState[currY][currX] === 1)
+						{
+							currClicked.push([currX, currY]);	
+						}		
+					}
+					else
+					{
+						currClicked = [];
+						return;
+					}					
+				}
+				
+				if (boardState[y][x] === 1)
+				{
+					currClicked.push([x, y]);			
+				}		
+			}
+			else if ((upperX - mouseX) <= CONST_INTERSECTION_RADIUS) //east
+			{
+				currX = x + 1;
+				currY = y;
+				
+				if (currX <= maxArrSize)
+				{
+					if (!checkIsBearLocation(currX, currY))
+					{
+						if (boardState[currY][currX] === 1)
+						{
+							currClicked.push([currX, currY]);	
+						}		
+					}
+					else
+					{
+						currClicked = [];
+						return;
+					}					
+				}
+				
+				if (boardState[y][x] === 1)
+				{
+					currClicked.push([x, y]);			
+				}					
+			}
+			else if ((mouseY - lowerY) <= CONST_INTERSECTION_RADIUS) //north
+			{
+				currX = x;
+				currY = y - 1;
+				
+				if (currY >= 0)
+				{
+					if (!checkIsBearLocation(currX, currY))
+					{
+						if (boardState[currY][currX] === 1)
+						{
+							currClicked.push([currX, currY]);	
+						}		
+					}
+					else
+					{
+						currClicked = [];
+						return;
+					}					
+				}
+				
+				if (boardState[y][x] === 1)
+				{
+					currClicked.push([x, y]);			
+				}					
+			}
+			else if ((upperY - mouseY) <= CONST_INTERSECTION_RADIUS) //south
+			{
+				currX = x;
+				currY = y + 1;
+				
+				if (currY <= maxArrSize)
+				{
+					if (!checkIsBearLocation(currX, currY))
+					{
+						if (boardState[currY][currX] === 1)
+						{
+							currClicked.push([currX, currY]);	
+						}		
+					}
+				}
+				
+				if (boardState[y][x] === 1)
+				{
+					currClicked.push([x, y]);			
+				}					
+			}
+			else //only 1 block
+			{				
+				if (boardState[y][x] === 1)
+				{
+					currClicked.push([x, y]);
+				}
+				else
+				{
+					return;
+				}
+			}
+			
+			currClickedLength = currClicked.length;
+			
+			for (var i = 0; i < currClickedLength; ++i)
+			{	
+				currClickedLoc = currClicked[i];				
+				ctx.drawImage(hitBlock, currClickedLoc[0] * CONST_BLOCK_SIZE, currClickedLoc[1] * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);
+			}
+						
+			if (document.getElementById("willFallCheckbox").checked === true)
+			{
+				var fallen = willFall(board, currClicked);			
+				var fallenLength = fallen.length;
+				
+				if (fallenLength > 0)
+				{
+					currFallen = fallen;
+					
+					for (var i = 0; i < fallenLength; ++i)
+					{
+						var currFallenBlock = fallen[i];
+						
+						ctx.drawImage(willFallBlock, currFallenBlock[0] * CONST_BLOCK_SIZE, currFallenBlock[1] * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);
+					}					
+				}
+			}						
+			
+			//need to check if bear is hit???
+		}
+				
+		//binds the handlers
+        function startGame() {
+		
+			$("#canvas").contextmenu(function (e) {                
+					return false;
+				});
+
+				$("#canvas").click(function (f) {
+					
+					if (stage == 0) {
+						handleClickPhase0(f);
+					}
+					if (stage == 1) {				
+						handleClickPhase1(f);
+					}
+				});
+				
+				$("canvas").dblclick(function (f) 
+				{
+					if (stage == 0)
+					{
+						handleClickPhase0(f);						
+					}
+					if (stage == 1) {				
+						handleClickPhase1(f);
+						
+						if (!isBotTurn)
+						{
+							confirmClicked();
+						}					
+					}					
+				});
+			}
+		
+  
+        $(function () {
+            $('#firstButton').popover({
+                container: "body",
+                html: true,
+                content: function () {
+
+                    return $('#message').html();
+                    ;
+                }
+
+            })
+        });
+						
+		//resets game state
+        function resetGame() {            
+            var submitButton = document.getElementById("submit");
+			submitButton.disabled = false;
+			submitButton.style.display = 'block';
+			
+			var confirmButton = document.getElementById("confirm");
+			confirmButton.disabled = true;
+			confirmButton.style.display = 'none';			
+			
+			var parent = document.getElementById("inner");
+            var child = document.getElementById("canvas");
+            parent.removeChild(child);
+            var reset = document.getElementById('reset');
+            reset.style.display = "none";
+			
+			var playerIdDisplay = document.getElementById('playerIdDisplay');
+			//var moveCountDisplay = document.getElementById('moveCountDisplay');
+			
+			var div = document.getElementById("inner");
+			div.removeChild(playerIdDisplay);
+			//div.removeChild(moveCountDisplay);
+			
+			var willFallCheckbox = document.getElementById("willFallCheckbox");
+			willFallCheckbox.checked = false;
+			
+			document.getElementById("grid-size").disabled = false;
+			document.getElementById("player1_name").disabled = false;
+			document.getElementById("player1_name").value = "Foo";
+			document.getElementById("player1Label").innerHTML = "Enter Player 1 name:";					
+			document.getElementById("player2_name").disabled = false;	
+			document.getElementById("player2_name").value = "Bar";
+			document.getElementById("player2Label").innerHTML = "Enter Player 2 name:";					
+						
+			stage = 0;
+			turnNumber = 0;		
+			bearLocation = [];
+			currClicked = [];
+			currFallen = [];
+			brokenIce = [];
+			weakIce = [];		
+			bearLocationLength = -1;		
+			board = {};			
+			gameMode = CONST_PVP;
+			botTurn = -1;
+			
+			var modeCombo = document.getElementById("playerMode");
+			modeCombo.selectedIndex = "0";
+			modeCombo.disabled = false;						
+        }
+		
+		function initMask(size){
+			//new Array
+
+			var mask = new Array(size);
+			
+			//Iter subarrays
+			for (var i = 0; i < size; i++){
+				mask[i] = new Array(size);
+				for (var j = 0; j < size; j ++){
+					mask[i][j] = 1;
+				}
+			}
+			
+			return (mask);
+		}
+
+		//Missing Pieces
+		function combinations(mask){
+			//Init row and cols sums arrays
+			var rowSums = Array.apply(null, Array(mask.length)).map(Number.prototype.valueOf,0);
+			var colSums = Array.apply(null, Array(mask.length)).map(Number.prototype.valueOf,0);
+			
+			//Iter through mask
+			for (var i = 0; i < mask.length; i++){
+				for (var j = 0; j < mask.length; j++){
+					rowSums[i] += mask[i][j];
+					colSums[j] += mask[i][j];
+				}
+			}
+			
+			//Create 2d array pairings of values
+			var sums = rowSums.reduce( (a, v) => [...a, ...colSums.map(x=>[v,x])], []);
+			var indices = [];
+			
+			//Values to indices
+			for (var i = 0; i < sums.length; i++){
+				if ((sums[i][0] != mask.length) && (sums[i][1] != mask.length)){
+					indices.push([Math.floor(i/mask.length), i % mask.length]);
+				}
+			}
+			
+			return (indices);
+		}
+
+
+		function willFallOld(board, currClicked){
+			//Temp board
+			var new_mask = copy(board.mask);
+			var hits = flipAxes(currClicked);
+
+			//Update board for hits
+			for (var i = 0; i < hits.length; i++){
+				new_mask[hits[i][0]][hits[i][1]] = 0;
+			}
+			
+			var indices = combinations(new_mask);
+			var fallen = [];
+			
+			for (var i = 0; i < indices.length; i++){
+				var ix = indices[i][0];
+				var iy = indices[i][1];
+				if (new_mask[ix][iy] == 1){
+					fallen.push([iy, ix]);
+				}
+			}
+			
+			return (fallen);
+
+		}
+
+		function inBear(i, j){
+			for (var m = 0; m < bearLocation.length; m++){
+				if ((bearLocation[m][1] == i) & bearLocation[m][0] == j){
+					return(1)
+				}
+			}
+			return (0);
+		}
+
+		function willFall(board, currClicked){
+			//Temp board
+			var new_mask = copy(board.mask);
+			var hits = flipAxes(currClicked);
+
+			//Update board for hits
+			for (var i = 0; i < hits.length; i++){
+				new_mask[hits[i][0]][hits[i][1]] = 0;
+			}
+					
+			var fallen = []
+			var update_mask = updateMask(board, currClicked);
+
+			for (var i = 0; i < new_mask.length; i++){
+				for (var j = 0; j < new_mask.length; j++){
+					if (update_mask.mask[i][j] != new_mask[i][j]){
+						if ((update_mask.state == 1) & (inBear(i,j) == 0)){							
+							fallen.push([j, i]);
+						} else if (update_mask.state == 0){
+							fallen.push([j, i]);
+						} 
+					}
+				}
+			}
+
+			if (update_mask.state == 0){
+				fallen = fallen.concat(bearLocation);
+			}
+			
+			return (fallen);
+		}
+
+
+		function flipAxes(currClicked){
+			var hits = new Array(currClicked.length);
+			for (var i = 0; i < currClicked.length; i++){
+				hits[i] = new Array(2);
+				hits[i][0] = currClicked[i][1];
+				hits[i][1] = currClicked[i][0];
+			}
+			return (hits);
+		}
+
+		//Update board
+		function updateMask(board, currClicked){
+			//Temp board
+			var new_mask = copy(board.mask);
+			var hits = flipAxes(currClicked);
+		   //Update board for hits
+		   for (var i = 0; i < hits.length; i++){
+			   new_mask[hits[i][0]][hits[i][1]] = 0;
+		   }
+		   
+		   //Other blocks to remove
+		   var indices = combinations(new_mask);
+		   
+		   //Update board
+		   for (var i = 0; i < indices.length; i++){
+			   var ix = indices[i][0];
+			   var iy = indices[i][1];
+			   new_mask[ix][iy] = 0;
+		   }
+
+		   var state = bearStatus(new_mask, bear_rows, bear_cols);
+
+		   new_board = {"state":state,
+						"mask":new_mask
+					   }
+
+		   return (new_board);
+		}		
+		
+		function getIndices(arr, ind){
+			//Init arr
+			var ind_arr = Array.apply(null, Array(arr.length)).map(Number.prototype.valueOf,0);
+			//Get ind from each subarray
+			for (var i = 0; i < arr.length; i++){
+				ind_arr[i] = arr[i][ind];
+			}
+			//Unique indices
+			var ind_arr_uniq = Array.from(new Set(ind_arr));
+			return (ind_arr_uniq);
+		}
+
+		function copy(obj) {
+			if (!obj) {
+			  return obj;
+			}
+		  
+			let v;
+			let obj2 = Array.isArray(obj) ? [] : {};
+			for (const k in obj) {
+			  v = obj[k];
+			  obj2[k] = (typeof v === "object") ? copy(v) : v;
+			}
+		  
+			return obj2;
+		}
+
+		//Bear Status
+		function bearStatus(mask, bear_rows, bear_cols){
+			var rowSums = Array.apply(null, Array(bear_rows.length)).map(Number.prototype.valueOf,0);
+			var colSums = Array.apply(null, Array(bear_cols.length)).map(Number.prototype.valueOf,0);
+
+			//Iter through Bear rows
+			for (var i = 0; i < bear_rows.length; i++){
+				for (var j = 0; j < mask.length; j++){
+					rowSums[i] += mask[bear_rows[i]][j];
+				}
+			}
+			
+			//Iter through Bear cols
+			for (var i = 0; i < mask.length; i++){
+				for (var j = 0; j < bear_cols.length; j++){
+					colSums[j] += mask[i][bear_cols[j]];
+				}
+			} 
+			
+			//Concat
+			var sums = rowSums.concat(colSums);
+			//Count how many are broken
+			var counts = 0;
+			for (var i = 0; i < sums.length; i++){
+				if (sums[i] != mask.length){
+					counts++;
+				}
+			}
+			if (counts == sums.length){
+				return (0);
+			} else {
+				return (1);
+			}
+			
+		}		
+	
+		//checks if the given coordinate is part of the 2x2 bear cluster
+		function checkIsBearLocation(x, y)
+		{
+			for (var bearIndex = 0; bearIndex < bearLocationLength; ++bearIndex)
+			{
+				var currBearLoc = bearLocation[bearIndex];
+											
+				if (currBearLoc[0] === x && currBearLoc[1] === y)
+				{
+					return true;
+				}							
+			}		
+		
+			return false;
+		}
+				
+		//will be called after calculation has been done to see the grid state
+		function paintGrid(newGrid)
+		{
+			brokenIce = [];
+			
+			//this will represent y coordinate			
+			for (var i = 0; i < rawGridSize; ++i)
+			{
+				//this will represent x coordinate
+				for (var j = 0; j < rawGridSize; ++j)
+				{
+					if (newGrid[i][j] === 1)
+					{
+						var isBear = false;
+					
+						if (checkIsBearLocation(j, i))
+						{
+							continue;
+							//ctx.drawImage(bearImage, j * CONST_BLOCK_SIZE, i * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);
+						}
+						else
+						{
+							ctx.drawImage(iceBlock, j * CONST_BLOCK_SIZE, i * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);
+						}					
+					}
+					else
+					{
+						if (checkIsBearLocation(j, i))
+						{
+							continue;
+							//ctx.drawImage(bearImage, j * CONST_BLOCK_SIZE, i * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);
+						}
+						else
+						{
+							brokenIce.push([j, i]);
+							ctx.drawImage(goneIce, j * CONST_BLOCK_SIZE, i * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);						
+						}
+					}
+				}
+			}
+		}
+		
+		//check if the block hit values are valid
+		function checkBlockHit()
+		{
+			if (stage === 0)
+			{
+				if (currClicked.length !== CONST_MAX_HIT_HIGHLIGHT)
+				{
+					alert("You must place the bears in a 2x2 block formation!");
+					return false;
+				}
+				
+				var tmp_rows = getIndices(currClicked, 0);
+				var tmp_cols = getIndices(currClicked, 1);
+
+				if (tmp_rows.length !== 2 || tmp_cols.length !== 2)
+				{
+					alert("You must place the bears in a 2x2 block formation!");
+					return false;
+				}
+				
+				return true;
+			}
+			else
+			{
+				var currClickedLength = currClicked.length;
+			
+				if (currClickedLength === 0)
+				{
+					alert("You must hit something!");
+					return false;
+				}
+				else if (currClickedLength > CONST_MAX_HIT_HIGHLIGHT)
+				{
+					alert("You can only hit at most 4 pieces in a 2x2 block!");
+					return false;
+				}
+								
+				if (currClickedLength > 1)
+				{
+					var end = currClickedLength - 1;
+					
+					while (end > 0)
+					{
+						for (var i = 0; i < end; ++i)
+						{
+							if (Math.abs(currClicked[i][0] - currClicked[end][0]) > 1 || Math.abs(currClicked[i][1] - currClicked[end][1]) > 1)
+							{
+								alert("You can only hit at most 4 pieces in a 2x2 block!");
+								return false;						
+							}
+						}
+
+						--end;
+					}					
+				}
+				
+				return true;
+			}
+		}
+		
+		function randomBearLocation()
+		{
+			var x = Math.floor(Math.random() * (rawGridSize - 1));
+			var y = Math.floor(Math.random() * (rawGridSize - 1));
+						
+			currClicked.push([x, y]);
+			currClicked.push([x + 1, y]);
+			currClicked.push([x, y + 1]);
+			currClicked.push([x + 1, y + 1]);
+			
+			bearLocation = currClicked;
+			bearLocationLength = bearLocation.length;
+			
+			bear_rows = getIndices(bearLocation, 1);
+			bear_cols = getIndices(bearLocation, 0);	
+
+			//should be 4, but we can use bearLocation.length for scalability.
+			var bearLength = bearLocation.length;			
+
+			//find the most left,north bear space
+			
+			var min_x = gridSize;
+			var min_y = gridSize;
+			
+			for (var i = 0; i < bearLength; ++i)
+			{
+				if (bearLocation[i][0] <  min_x)
+				{
+					min_x = bearLocation[i][0];
+				}
+				
+				if (bearLocation[i][1] < min_y)
+				{
+					min_y = bearLocation[i][1];
+				}
+				//ctx.drawImage(bearImage, bearLocation[i][0] * CONST_BLOCK_SIZE, bearLocation[i][1] * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);
+			}
+			
+			ctx.drawImage(bearImage, min_x * CONST_BLOCK_SIZE, min_y * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE * 2, CONST_BLOCK_SIZE * 2);
+							
+			stage = 1;
+			turnNumber++;
+			currClicked = [];
+			
+			if (turnNumber % 2 === 0)
+			{
+				$(playerIdDisplay).html("Current player: " + playerOneName);
+			}
+			else
+			{
+				$(playerIdDisplay).html("Current player: " + playerTwoName);
+			}
+			
+		}
+						
+		//game start with the player names and grid size		
+		function confirmClicked()
+		{
+			//at bear setting stage
+			if (stage === 0)
+			{
+				if (!checkBlockHit())
+				{					
+					return;
+				}
+				
+				bearLocation = currClicked;
+				bearLocationLength = bearLocation.length;
+				
+				bear_rows = getIndices(bearLocation, 1);
+				bear_cols = getIndices(bearLocation, 0);						
+				
+				//should be 4, but we can use bearLocation.length for scalability.
+				var bearLength = bearLocation.length;
+				
+				//find the most left,north bear space
+				
+				var min_x = gridSize;
+				var min_y = gridSize;
+				
+				for (var i = 0; i < bearLength; ++i)
+				{
+					if (bearLocation[i][0] <  min_x)
+					{
+						min_x = bearLocation[i][0];
+					}
+					
+					if (bearLocation[i][1] < min_y)
+					{
+						min_y = bearLocation[i][1];
+					}
+					//ctx.drawImage(bearImage, bearLocation[i][0] * CONST_BLOCK_SIZE, bearLocation[i][1] * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);
+				}
+				
+				ctx.drawImage(bearImage, min_x * CONST_BLOCK_SIZE, min_y * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE * 2, CONST_BLOCK_SIZE * 2);
+								
+				stage = 1;
+				turnNumber++;
+				currClicked = [];
+				
+				if (turnNumber % 2 === 0)
+				{
+					$(playerIdDisplay).html("Current player: " + playerOneName);
+				}
+				else
+				{
+					$(playerIdDisplay).html("Current player: " + playerTwoName);
+				}
+			}
+			else
+			{
+				//Check valid input
+				if (!checkBlockHit())
+				{
+					return;
+				}		
+				
+				currFallen = [];
+				
+				var newBoard = updateMask(board, currClicked);
+				
+				board = newBoard
+				
+				//given the results, repaint map and update coor;								
+				paintGrid(newBoard.mask);
+				
+				if (newBoard.state === 0)
+				{
+					//game over
+					stage = 2;
+					
+					for (i = 0; i < CONST_MAX_HIT_HIGHLIGHT; ++i)
+					{
+						ctx.drawImage(goneIce, bearLocation[i][0] * CONST_BLOCK_SIZE, bearLocation[i][1] * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);
+					}
+					
+					$(playerIdDisplay).html("Game Over!");
+					
+					if (turnNumber % 2 === 0)
+					{
+						alert("Player 1 disturbed the bears and is going to jail, how could you? That means Player 2 wins!")
+						
+					}
+					else
+					{
+						alert("Player 2 disturbed the bears and is going to jail, how could you? That means Player 1 wins!")
+					}					
+					
+					var confirmButton = document.getElementById("confirm");
+					confirmButton.disabled = true;
+					confirmButton.style.display = 'none';							
+					
+					return;					
+				}
+				
+				turnNumber++;
+				currClicked = [];						
+				
+				if (turnNumber % 2 === 0)
+				{
+					$(playerIdDisplay).html("Current player: " + playerOneName);
+				}
+				else
+				{
+					$(playerIdDisplay).html("Current player: " + playerTwoName);
+				}				
+			}
+			
+			if (turnNumber % 2 === botTurn)
+			{
+				isBotTurn = true;
+
+				if (turnNumber % 2 === 0)
+				{
+					$(playerIdDisplay).html("Current player: " + playerOneName);
+				}
+				else
+				{
+					$(playerIdDisplay).html("Current player: " + playerTwoName);
+				}	
+				
+				setTimeout(playBotTurn, 1000);				
+				turnNumber++;
+				currClicked = [];			
+				
+			}
+		}
+		
+		function sleep(milliseconds) 
+		{
+			var start = new Date().getTime();
+			for (var i = 0; i < 1e7; i++) {
+				if ((new Date().getTime() - start) > milliseconds){
+					break;
+				}
+			}
+		}		
+		
+		function playBotTurn()
+		{
+			var currMask = board.mask;
+			var validMove = [];
+			var foundMove = false;
+			
+				
+			if (turnNumber % 2 === 0)
+			{
+				$(playerIdDisplay).html("Current player: " + playerOneName);
+			}
+			else
+			{
+				$(playerIdDisplay).html("Current player: " + playerTwoName);
+			}	
+			
+			
+			//this is y
+			for (var i = 0; i < rawGridSize; ++i)
+			{
+				//got a non-losing move, exit loop
+				if (foundMove)
+				{
+					break;
+				}
+			
+				//this is x
+				for (var j = 0; j < rawGridSize; ++j)
+				{
+					//don't forget this is reverse orientation
+					if (currMask[i][j] === 1)
+					{
+						if (!checkIsBearLocation(j, i))
+						{
+							//if there are no valid moves, then bot has won already
+							validMove = [[j, i]];
+							
+							var newBoard = updateMask(board, validMove);
+							
+							if (newBoard.state === 0)
+							{
+								continue;
+							}
+							else
+							{
+								foundMove = true;								
+								board = newBoard;
+								ctx.drawImage(hitBlock, j * CONST_BLOCK_SIZE, i * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);								
+								paintGrid(newBoard.mask);
+								break;
+							}
+						}					
+					}				
+				}
+			}
+			
+			isBotTurn = false;
+			
+			//bot loses
+			if (!foundMove)
+			{				
+				var newBoard = updateMask(board, validMove);
+				paintGrid(newBoard.mask);
+				//game over
+				stage = 2;
+				turnNumber++;
+				
+				for (i = 0; i < CONST_MAX_HIT_HIGHLIGHT; ++i)
+				{
+					ctx.drawImage(goneIce, bearLocation[i][0] * CONST_BLOCK_SIZE, bearLocation[i][1] * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);
+				}
+				
+				$(playerIdDisplay).html("Game Over!");
+				
+				if (turnNumber % 2 === 0)
+				{
+					alert("Player 1 disturbed the bears and is going to jail, how could you? That means Player 2 wins!")
+					
+				}
+				else
+				{
+					alert("Player 2 disturbed the bears and is going to jail, how could you? That means Player 1 wins!")
+				}					
+				
+				var confirmButton = document.getElementById("confirm");
+				confirmButton.disabled = true;
+				confirmButton.style.display = 'none';							
+				
+				return;					
+			}			
+		}
+		
+		//called after submit is clicked. Make sure the given parameters are correct and initialize the next stage
+        function verifyAndStart() 
+		{
+            gridSize = document.getElementById("grid-size").value;
+			maxArrSize = gridSize - 1;
+			playerOneName = document.getElementById("player1_name").value;
+			playerTwoName = document.getElementById("player2_name").value;
+			rawGridSize = gridSize;
+			
+			if (isValidInput(gridSize))
+			{
+				var selection = document.getElementById("playerMode").value;
+				
+				if (selection === CONST_PVP)
+				{
+					gameMode = CONST_PVP;
+					botTurn = -1;
+				}
+				else if (selection === CONST_PVA)
+				{
+					gameMode = CONST_PVA;
+					botTurn = 1;
+				}
+				else if (selection === CONST_AVP)
+				{
+					gameMode = CONST_AVP;
+					botTurn = 0;
+				}
+				
+                var reset = document.getElementById('reset');
+                reset.style.display = "block";
+				
+				gridSize = gridSize * CONST_BLOCK_SIZE;
+                var reset = document.getElementById('reset');
+                
+                canvas = document.createElement("canvas");
+                canvas.id = "canvas";
+                canvas.width = gridSize;
+                canvas.height = gridSize;
+                var div = document.getElementById("inner");
+                div.appendChild(canvas);				
+				
+				var submitButton = document.getElementById("submit");
+                submitButton.disabled = true;
+				submitButton.style.display = 'none';
+				
+				var modeCombo = document.getElementById("playerMode");
+				modeCombo.disabled = true;
+				
+				var confirmButton = document.getElementById("confirm");
+				confirmButton.disabled = false;
+				confirmButton.style.display = 'block';						
+				
+                document.getElementById("grid-size").disabled = true;
+				document.getElementById("player1_name").disabled = true;
+				document.getElementById("player2_name").disabled = true;				
+				
+                ctx = canvas.getContext("2d");
+                canvasOffset = $("#canvas").offset();
+                offsetX = canvasOffset.left;
+                offsetY = canvasOffset.top;				
+				
+                drawBackground(ctx);
+                
+                stage = 0;
+				board = {"state": 1, "mask": initMask(rawGridSize)};
+				
+                var playerIdDisplay = document.createElement("h5");
+                playerIdDisplay.id = "playerIdDisplay";
+                playerIdDisplay.class = "text-primary";			
+
+
+                $(playerIdDisplay).html("Player 1 will place the bear location.");
+
+                var div = document.getElementById("inner");
+                div.appendChild(playerIdDisplay);		
+				
+				startGame();
+
+				for (var i = 0; i < gridSize; ++i)
+				{
+					for (var j = 0; j < gridSize; ++j)
+					{
+						ctx.drawImage(iceBlock, i * CONST_BLOCK_SIZE, j * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);
+					}
+				}
+				
+				if (gameMode === CONST_AVP)
+				{
+					randomBearLocation();
+				}							
+			}
+			else {
+                alert("Invalid input")
+            }
+        }
+
+        function isValidInput(x) 
+		{
+            if (isNaN(x) || x < 6 || x > 12) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+		
+		function checkboxChanged()
+		{
+			if (document.getElementById("willFallCheckbox").checked === true)
+			{
+				if (currClicked.length > 0)
+				{
+					var fallen = willFall(board, currClicked);					
+					var fallenLength = fallen.length;
+					
+					if (fallenLength > 0)
+					{
+						currFallen = fallen;
+						
+						for (var i = 0; i < fallenLength; ++i)
+						{
+							var currFallenBlock = fallen[i];
+							
+							ctx.drawImage(willFallBlock, currFallenBlock[0] * CONST_BLOCK_SIZE, currFallenBlock[1] * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);
+						}					
+					}				
+				}
+			}
+			else 
+			{
+				if (currFallen.length > 0)
+				{
+					var currFallenLength = currFallen.length;								
+					
+					for (var i = 0; i < currFallenLength; ++i)
+					{
+						var currFallenBlock = currFallen[i];
+						
+						ctx.drawImage(iceBlock, currFallenBlock[0] * CONST_BLOCK_SIZE, currFallenBlock[1] * CONST_BLOCK_SIZE, CONST_BLOCK_SIZE, CONST_BLOCK_SIZE);
+					}		
+				}
+			}
+			
+				
+		}
+
+		function playerModeChanged()
+		{
+			var selection = document.getElementById("playerMode").value;
+			
+			if (selection === CONST_PVP)
+			{
+				document.getElementById("player1_name").disabled = false;
+				document.getElementById("player1_name").value = "Foo";
+				document.getElementById("player1Label").innerHTML = "Enter Player 1 name:";					
+				document.getElementById("player2_name").disabled = false;
+				document.getElementById("player2_name").value = "Bar";
+				document.getElementById("player2Label").innerHTML = "Enter Player 2 name:";						
+			}
+			else if (selection === CONST_PVA)
+			{
+				document.getElementById("player1_name").disabled = false;
+				document.getElementById("player1_name").value = "Foo";
+				document.getElementById("player1Label").innerHTML = "Enter Player 1 name:";					
+				document.getElementById("player2_name").disabled = true;
+				document.getElementById("player2_name").value = "EZbot";
+				document.getElementById("player2Label").innerHTML = "Bot Name:";				
+			}
+			else if (selection === CONST_AVP)
+			{
+				document.getElementById("player1_name").disabled = true;
+				document.getElementById("player1_name").value = "EZbot";
+				document.getElementById("player1Label").innerHTML = "Bot Name:";	
+				document.getElementById("player2_name").disabled = false;
+				document.getElementById("player2_name").value = "Bar";
+				document.getElementById("player2Label").innerHTML = "Enter Player 2 name:";	
+			}
+		}
+		
+    </script>
+
+
+</head>
+
+<body style="background-color:rgb(222,222,222);">
+
+<div id="topTitle">
+	<div class="wrap">
+		<h1 style="background-color:rgb(0,205,205);"><font color="white">Ice Breaker</font></h1>
+	</div>
+    <br>
+    <br>
+</div>
+<div class="wrapper" id="wrapper" style="margin: auto; width: 95%; position: absolute;">
+    <div id="outer" style="text-align: center; position:absolute; width:65%">
+        <div id="inner" style="display: inline-block;">
+		<button type="button" id="confirm" class="btn btn-primary" disabled=true visibility='hidden' style="display:none;margin: 5px" onclick="confirmClicked()">
+            Confirm</button>
+        </div>
+    </div>
+
+
+    <div class="form-group" id="RightPane" style="position: absolute; top:0; left: 70%; width:30%">
+        <a id="firstButton" class="btn btn-default" rel="popover" data-placement="bottom"
+           data-message="Message">Instructions</a>
+		   
+        <h2>Parameters</h2>
+
+
+        <br>
+
+        Enter the size of the square grid (6 to 12): <input type="text" id="grid-size" value="6" class="form-control"
+                                                  required style=";margin: 5px"><br>
+        
+		
+		<select id="playerMode" onchange="playerModeChanged()">
+			<option value="PvP">Human vs Human</option>
+			<option value="PvA">Human vs AI (Human first)</option>
+			<option value="AvP">AI vs Human (AI first)</option>
+		</select>
+        <br>
+		<br>
+
+        <font id="player1Label"> Enter Player 1 name: </font> <input type="text" id="player1_name" value="Foo" class="form-control"
+                                                  required style=";margin: 5px"><br>
+       
+        <font id="player2Label"> Enter Player 2 name: </font> <input type="text" id="player2_name" value="Bar" class="form-control"
+                                                  required style=";margin: 5px"><br>																						
+		<input type="checkbox" id="willFallCheckbox" onclick="checkboxChanged()">Show potentially impacted blocks<br>									
+       
+        <button type="button" id="submit" class="btn btn-primary" style=";margin: 5px" onclick="verifyAndStart()">
+            Submit</button>		
+        <button type="button" id="reset" class="btn btn-primary" onclick="resetGame()"
+                style="float: right;display: none;margin: 5px;">Start over!
+        </button>
+        <button type="button" id="restart" class="btn btn-primary" onclick="restartGame()"
+                style="float: right;display: none;margin: 5px">Try again!
+        </button>
+        <br>
+        <br>
+        
+
+        <div id="message" style="display:none;">
+            <b>Rules</b>            
+			<br>
+            Dear Dr. Nepharious,
+			I see you have accepted my wager.  The building of my new semi-aquatic lair will commence as soon as we remove the offending ice.  I will have the polar bear placed on a 2x2 ice block of your choice (Player 1) after which we can commence in our game.  We will take turns breaking blocks of ice until the loser knocks the bear into the water.  Don't forget the Mounties will come for the player who knocks the bear into the water, so be careful.
+			<br />
+			<br>
+			<br />
+			<em>
+			Rules <br> <br />
+			- Player 1 will choose a 2x2 set of blocks for the polar bears. <br> <br />
+			- Players will alternate turns choosing where to hit the blocks the bear is not resting on each turn, the intersections may be hit as well. <br> <br />
+			- The game continues until a player knocks all four polar bears into the water.  They can hold each up until if only a few of them are knocked in. <br> <br />
+			- Ice blocks will only stay up if it is in either a complete row or complete column. <br> <br />
+			- Each player can click Confirm to finish their term, or double click their choice <br> <br />
+			- Players can also turn on a hint mode, to show which blocks will fall with their current selection. <br> <br />
+			</em>
+			Good Luck!        
+        </div>
+
+
+        <br><br>
+
+
+    </div>
+
+
+</div>
+
+</body>
+
+</html>
+

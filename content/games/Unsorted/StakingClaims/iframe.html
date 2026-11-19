@@ -1,0 +1,95 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title> Staking Claims </title>
+<style>
+  * { padding: 0; margin: 0 auto; }
+  canvas { background: #eee; display: block;}
+</style>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+<script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <h1 class="page-header game-title"> Staking Claims </h1>
+      <div class="col-md-3" style="margin-top:10px;">
+
+        <div class="info-form">
+           <label for="number of circles"> Round of the game </label>
+           <input type="text" class="form-control info-input" id="round" value="2">
+        </div>
+
+        <div class="alert btn-primary" style="" onclick = "startGame()">
+            <b style="margin-top:5px">Start New Game</b>
+        </div>
+
+      	<div class="alert alert-info" role="alert" id="whichround">
+      	  <b >Round: 1</b>
+      	</div>
+
+      	<div class="alert alert-info" role="alert" id="whomoves">
+      	  <b>Player 1</b> to move.
+      	</div>
+
+      	<div class="well" role="alert" id="msgbox">
+      	  <b>Player 1's area: <span id="player1_score"> 0</span></b>
+      	</div>
+
+      	<div class="well" role="alert" id="msgbox">
+      	  <b>Player 2's area: <span id="player2_score"> 0</span></b>
+      	</div>
+
+        <div class="alert alert-danger" role="alert" id="alertbox" style="opacity:0.0" >
+    	    Game ends in tie!
+    	  </div>
+
+      </div>
+
+      <div class="col-md-6" style="position:relative; margin-top:10px;" >
+        <canvas id = "myCanvas" width="500" height="500"></canvas>
+      </div>
+
+      <div class="col-md-3 " style="padding-right:10px">
+      	<div class="panel panel-default">
+      	  <div class="panel-body  alert-info">
+              <h3>Instructions</h3>
+              <ul class="list-group">
+                <li class="list-group-item">
+                  Players take turns to place some number of circles of different radius on the canvas.
+                </li>
+                <li class="list-group-item">
+                  4 circles being drawn is treated as one round.
+                </li>
+                <li class="list-group-item">
+                  For each round, player1 draws one circle with control of the center and radius of the circle.
+                  After player1 properly chooses a center and a point supposedly on the circle, a new circle will be drawn on the canvas.
+                  Then player2 starts to draw a new circle in the remain blank space with the opponent's circle just drawn. And player2
+                  continues to draw a third circle of the current round, following by player1 draws the fourth circle.
+                </li>
+                <li class="list-group-item">
+                  If the new drawn circle somehow steps on the area of other previous circles or is beyond the border of the canvas,
+                  then the circle will be automatically narrowed down to proper radius to fit in a blank space of the canvas.
+                </li>
+              </ul>
+            	<h6 class="text-right">-by Wildcats </h6>
+      	  </div>
+      	</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+
+</html>

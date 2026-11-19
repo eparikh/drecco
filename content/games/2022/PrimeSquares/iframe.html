@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml"
+      xmlns:v-on="http://www.w3.org/1999/xhtml">
+
+<head>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="assets/css/semantic.min.css">
+    <script src="assets/css/semantic.min.js" type="text/javascript" ></script>
+    <link rel="stylesheet" type="text/css" href="assets/css/main.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/animate.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/tictac.css">
+</head>
+
+<body onload="loadup()">
+
+<div id="gameArea">
+    <div id = "gridWrapper">
+        <div class="container">
+            <h1>Prime Squares Game</h1>
+            <div class=title>
+                <button class="large ui blue basic button" v-on:click="changeInstr()">Hide/Reveal Instructions</button>
+            </div>
+            <div>
+                <div class="instr"v-if="showInstr()">
+                    <strong>Game Description:</strong>
+                    <ul>
+                        <li>
+                            Prime Squares is a tic-tac-toe like game in which the goal is to form primes along the rows, columns and diagonals (including secondary diagonals) in any direction (up-to-down, left-to-right, down-to-up, right-to-left). The more primes one makes, the better the score.
+
+                        </li>
+                        <li>
+                            Starts with an empty 3 x 3 square.
+                        </li>
+                        <li>
+                            The players alternately fill a square with a number (except the last move is given to player 2).
+                        </li>
+                        <li>
+                            Whenever a number completes a row, column, diagonal (primary or secondary), the number of primes formed as a consequence (in any direction of the row, column or diagonal) are added to the player’s score.
+                        </li>
+                        <li>
+                            0 is not allowed to be placed in any of the border cells.
+                        </li>
+                        <li>
+                            Phase Two: If phase two of the game is enabled, then both players get one extra turn to change a single number on the board after the board has been completely filled. Any primes resulting from that change that go through the change position are given to player.  Player One will move first in Phase Two, followed by Player Two. Player two cannot change the same position as player 1.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="scoreboard2" id="player_name_section">
+                <h3 id="player_names">Enter Player Names:</h3>
+                <h3>
+                    Player One Name: <input type="text" id = "input_player_one" name="Player One" value="Player One" maxlength="10"/>
+                </h3>
+                <h3>
+                    Player Two Name: <input type="text" id="input_player_two" name = "Player Two" value = "Player Two" maxlength="10"/>
+                </h3>
+            </div>
+            <div class="scoreboard" id="scoreboard_section">
+                <h3 id="player_score">Player One:</h3>
+                <h3 id="player_two_score">Player Two:</h3>
+            </div>
+            <div class="button-holder">
+                <button onclick="start_game()">START GAME</button>
+                <button onclick="reset_board()">RESET BOARD</button>
+                <button onclick="stop_game()">STOP GAME</button>
+                <button onclick="toggle_phase_two()">TOGGLE PHASE TWO</button>
+            </div>
+            <h3 id="player_turn"></h3>
+            <div class="play-area">
+                <div id="0" class="block" onclick="addPlayerMove(0)"></div>
+                <div id="1" class="block" onclick="addPlayerMove(1)"></div>
+                <div id="2" class="block" onclick="addPlayerMove(2)"></div>
+                <div id="3" class="block" onclick="addPlayerMove(3)"></div>
+                <div id="4" class="block" onclick="addPlayerMove(4)"></div>
+                <div id="5" class="block" onclick="addPlayerMove(5)"></div>
+                <div id="6" class="block" onclick="addPlayerMove(6)"></div>
+                <div id="7" class="block" onclick="addPlayerMove(7)"></div>
+                <div id="8" class="block" onclick="addPlayerMove(8)"></div>
+            </div>
+            <div class="button-holder">
+                <button onclick="submit_move()">SUBMIT MOVE</button>
+            </div>
+            <h2 id="winner"></h2>
+            <div class="button-holder">
+                <button onclick="toggle_primes()">SHOW/HIDE LIST OF PRIMES</button>
+            </div>
+            <h3 id="show_primes"></h3>
+        <script src="assets/js/tictac.js"></script>
+    </div>
+</div>
+
+<script type="text/javascript" src="assets/js/bundle.js" charset="utf-8"></script>
+</body>
+

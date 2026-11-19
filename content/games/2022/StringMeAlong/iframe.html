@@ -1,0 +1,575 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml"
+    xmlns:v-on="http://www.w3.org/1999/xhtml">
+
+<head>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="assets/css/semantic.min.css">
+    <script src="assets/css/semantic.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="assets/css/main.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/animate.css">
+    <style>
+        .square {
+            border: 2px solid red;
+            /* text-align: center; */
+            /* padding: 1%; */
+            display: inline-block;
+        }
+
+        .square_container {
+            scroll-behavior: auto;
+            overflow: auto;
+            height: 300px;
+        }
+
+        #changeCharacter {
+            display: None;
+            margin: 5%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="gameArea">
+        <div class=title>
+            <h2>String Me Along</h2>
+            <button class="large ui blue basic button" v-on:click="changeInstr()">Hide/Reveal Instructions</button>
+        </div>
+
+        <div>
+            <div class="instr" v-if="showInstr()">
+                <strong>Overview:</strong> <br />
+                <p> 
+                    String Me Along is a two-player game where each player tries to add a new character from the character list without repeating 
+                    a substring of an agreed-upon length. For example, if the only two characters are A and B, the agreed-upon 
+                    length is 2, and the string so far is 'ABA' then the player who plays the next character 
+                    should not place B because then 'AB' would have been repeated twice. If that player appends 'A' then the 
+                    string will be 'ABAA' and the other player will lose no matter which letter he or she places. Whoever lasts 
+                    the longest wins. The agreed-upon NoRepeat length is specified in the NoRepeat field. The number of possible 
+                    characters is specified in the Alphabet field. At an advanced level, a player may change a letter already in the 
+                    string before appending a character. If changing or appending the character causes a repeat of size NoRepeat length, 
+                    then that player loses. Each player may change at most three times during a game.
+                </p>
+            </div>
+        </div>
+        <div id="infoPanel">
+            <br></br>
+
+            <!-- <div id="basicInfoAI" v-if="showBasicInfoAI()">
+                <h2> Your Score:{{scoreTwo}} (smaller is better) </h2>
+                <h2> It's {{gameStatus}} now </h2>
+            </div> -->
+
+            <!-- <div class="configureTool" v-if="showModeSelect()">
+                <select class="ui search dropdown" v-model="mode">
+                    <option>AI</option>
+                    <option>PvP</option>
+                </select>
+
+                <select class="ui search dropdown" v-model="size">
+                    <option v-for="sizeReal in sizes" v-bind:value="sizeReal">
+                        {{ sizeReal }}
+                    </option>
+                </select>
+
+                <select class="ui search dropdown" v-model="difficulty">
+                    <option>Easy</option>
+                    <option>Normal</option>
+                </select>
+
+                <button class="large ui blue basic button" v-on:click="startGame()">Start Game! </button>
+            </div> -->
+
+
+            <div class="game_inputs">
+                NoRepeat Length: <input type="text" id="k_input" name="k_input" placeholder="e.g. 3"><br><br>
+                Alphabet: <input type="text" id="charset_input" name="charset_input" placeholder="e.g. A,B"
+                    width="100px"><br><br>
+                <button onclick="submitGameInputs()">Submit</button>
+            </div>
+
+            <h2>
+                <div id="scoreInfoTwoPlayer">
+                    <h2 id="p1_score"> P1 Score: 0 </h2>
+                    <h2 id="p2_score"> P2 Score: 0</h2>
+                    <h2 id="round_num"> Round Number: 1</h2>
+                </div>
+            </h2>
+
+
+            <div id="mainInputs">
+                <!--
+                char-input: <input type="text" id="char_input" name="char_input" placeholder="e.g. A"><br><br>
+                -->
+                <button onclick="appendChar()" id="append">Append</button>
+                <div id="changeCharacter">
+                    <!--
+                    New Character: <input type="text" id="newChar"></input>
+                    -->
+                    <button onclick="handleChangeChar()" id="change">Change</button>
+                </div>
+            </div>
+
+            <h2>
+                <div id="basicInfoTwoPlayer">
+                    P1 turn
+                </div>
+            </h2>
+
+            <h2>
+                <div id="resultOfEachRound">
+
+                </div>
+            </h2>
+            <div id="startOfNewRound">
+
+            </div>
+
+            <h2>
+                <div class="winner_section" id="winner_section">
+
+                </div>
+            </h2>
+
+
+            <div v-if="showBetweenGameInfo()">
+                <button class="large ui violet basic button" v-on:click="revealBoard()">{{reveal}}</button>
+                <button class="large ui olive basic button" v-on:click="startNextRound()">Start Next Round</button>
+                <div class="startSameGame">
+                    <select class="ui search dropdown" v-model="difficulty">
+                        <option>Easy</option>
+                        <option>Normal</option>
+                    </select>
+                    <button class="large ui pink basic button" v-on:click="startSameGame()">Start a new single game
+                        with
+                        this tunnel</button>
+                </div>
+            </div>
+
+            <div v-if="showSaveButton()">
+                <h2>Winner is {{getWinner()}}</h2>
+                <div class="ui action input">
+                    <input type="text" placeholder="Enter Your Name.." v-model="winnerName">
+                    <button class="large ui green basic button" id="score" v-on:click="saveScore()">Save
+                        Score</button>
+                </div>
+                <button class="large ui violet basic button" v-on:click="revealBoard()">{{reveal}}</button>
+                <div class="startSameGame">
+                    <select class="ui search dropdown" v-model="difficulty">
+                        <option>Easy</option>
+                        <option>Normal</option>
+                    </select>
+                    <button class="large ui pink basic button" v-on:click="startSameGame()">Start a new single game
+                        with
+                        this tunnel</button>
+                </div>
+            </div>
+
+            <div id="tunnelInfo">
+                <transition name="fade">
+                    <div id="edgeInfo" v-if="showEdgeInfo()">
+                        <h2>Max edges: {{maxEdge()}} Edges left: {{edgeLeft()}} Isvalid: {{isValid()}}</h2>
+                        <button class="large ui blue basic button" v-on:click="gotoDetect()">I finished my
+                            tunnel</button>
+                        <button class="large ui red basic button" v-on:click="clearBoard()">Clear and start
+                            again</button>
+                    </div>
+                </transition>
+
+            </div>
+
+            <div class="guessInfo">
+                <transition name="fade">
+                    <div id="guessInfo" v-if="showGuessInfo()">
+                        <h2>Guess round {{guessRound}} of 3</h2>
+                        <button class="large ui basic green button" v-on:click="finishPrepare()">Finish this
+                            Round</button>
+                    </div>
+                </transition>
+
+                <transition name="fade">
+                    <div id="finishGuess" v-if="showFinishGuessInfo()">
+                        <button class="large ui basic green button" v-on:click="finishGuess()">Finish Guess</button>
+                    </div>
+                </transition>
+            </div>
+        </div>
+
+        <div id="gridWrapper">
+            <!-- <template v-for="m in size + 1">
+                <div class=hedgeWrapper>
+                    <template v-for="n in size + 1">
+                        <div v-bind:class="nodes[m-1][n-1].class" v-on:click="nodeClick(nodes[m-1][n-1])"></div>
+                        <div v-if="n < size + 1" v-bind:class="hedges[m-1][n-1].class"
+                            v-on:click="edgeClick(hedges[m-1][n-1])"></div>
+                    </template>
+                </div>
+                <div v-if="m < size + 1">
+                    <div id="vedges" v-for="n in size + 1" class=vedgeWrapper>
+                        <div v-bind:class="vedges[m-1][n-1].class" v-on:click="edgeClick(vedges[m-1][n-1])"></div>
+                        <div v-if="n < size + 1" class="left"></div>
+                    </div>
+                </div>
+            </template> -->
+        </div>
+
+        <div class="square_container" id="square_container">
+
+        </div>
+
+
+
+
+    </div>
+
+    <script type="text/javascript" src="assets/js/bundle.js" charset="utf-8"></script>
+
+    <script>
+        // global variable (game inputs)
+        let k_input = null;
+        let charset_input = null;
+        let string_so_far = "";
+        let p1_turn = true;
+        let length_of_string = 0;
+        let p1_score = 0;
+        let p2_score = 0;
+        let round_num = 1;
+        let changeCharacterIndex;
+        let characterOfChangeChar;
+        let characterinput;
+
+        let p1_triesChange = 3; 
+        let p2_triesChange = 3; 
+
+
+        function submitGameInputs() {
+            k_input = document.getElementById("k_input").value;
+            charset_input = document.getElementById("charset_input").value;
+            console.log("checking game inputs");
+            if (validateGameInputs(k_input, charset_input)) {
+                document.getElementById("k_input").disabled = "true";
+                document.getElementById("charset_input").disabled = "true";
+
+                let tmp = charset_input.split(',');
+
+                for (let i = 0; i < tmp.length; i++) {
+                    document.getElementById("mainInputs").insertBefore(createBoxElement(tmp[i], `${tmp[i]}0`, onClickGameInput), document.getElementById("append"));
+                }
+                
+                for (let i = 0; i < tmp.length; i++) {
+                    document.getElementById("changeCharacter").insertBefore(createBoxElement(tmp[i], `${tmp[i]}`, onClickBoxChangeChar), document.getElementById("change"));
+                }
+            } else {
+                console.log("invalid game inputs");
+                alert("1. k-input should be a valid number. \n2. char-set-input should be comma separated list of capitalized letter.")
+            }
+        }
+
+        // function to validate game inputs
+        function validateGameInputs(k_input, charset_input) {
+            // console.log("inside validate game inputs");
+            let is_k_input_valid = /^\d+$/.test(k_input);
+            // console.log("is_k_input_valid " + is_k_input_valid);
+            let is_charset_valid = true;
+            let char_set_input = charset_input.split(',');
+            for (i = 0; i < char_set_input.length; i++) {
+                // console.log("is_charset_valid check after " + char_set_input[i] + " " + is_charset_valid);
+                if (char_set_input[i].length == 1 &&
+                    char_set_input[i].charCodeAt(0) >= 65 &&
+                    char_set_input[i].charCodeAt(0) <= 90) {
+                    is_charset_valid = is_charset_valid && true;
+                } else {
+                    // console.log("length " + char_set_input[i].length);
+                    // console.log("ascii " + char_set_input[i].charCodeAt(0));
+                    is_charset_valid = is_charset_valid && false;
+                }
+            }
+            // console.log("is_charset_valid final " + is_charset_valid);
+            return is_k_input_valid && is_charset_valid;
+        }
+
+        // function to validate input of appended character.
+        function validateAppendCharInput(curr_char) {
+            return (curr_char.length == 1 &&
+                curr_char.charCodeAt(0) >= 65 &&
+                curr_char.charCodeAt(0) <= 90);
+        }
+
+        // helper to replace at index
+        String.prototype.replaceAt = function(index, replacement) {
+           return this.substring(0, index) + replacement + this.substring(index + replacement.length);
+        }
+
+        function createChangeChar(length) {
+            return function() {
+                //console.log(p1_triesChange);
+                //console.log(p2_triesChange);
+                if ((p1_turn && p1_triesChange === 0) || string_so_far == "") {
+                    return; 
+                }
+                if ((!p1_turn && p2_triesChange === 0) || string_so_far == "") {
+                    return;
+                }
+                document.getElementById("changeCharacter").style.display = "block";
+                changeCharacterIndex = length - 1;
+            }
+        }
+        
+        function onClickBoxChangeChar() {
+            characterOfChangeChar = this.id;
+            //console.log(characterOfChangeChar);
+        }
+
+        function onClickGameInput() {
+            characterinput = this.innerHTML;
+        }
+
+        function handleChangeChar() {
+            //console.log(characterOfChangeChar);
+            string_so_far = string_so_far.replaceAt(changeCharacterIndex, characterOfChangeChar);
+            document.getElementById(`${changeCharacterIndex+1}`).innerHTML = characterOfChangeChar;
+            if (p1_turn) {
+                p1_triesChange -= 1; 
+            }
+            else {
+                p2_triesChange -= 1;
+            }
+            document.getElementById("changeCharacter").style.display = "None";
+            if (validate(parseInt(k_input), charset_input.split(','), string_so_far) == false) {
+                // shows which String is wrong
+                // index + 1 is the element's id
+
+                if (repeatedSubstring(parseInt(k_input), charset_input.split(','), string_so_far)) {
+                    const [first, second] = repeatedSubstring(parseInt(k_input), charset_input.split(','), string_so_far);
+                    for (let i = first; i < first + parseInt(k_input); i++) {
+                        document.getElementById(`${i + 1}`).style.color = "orange";
+                    }
+
+                    for (let i = second; i < second + parseInt(k_input); i++) {
+                        document.getElementById(`${i + 1}`).style.color = "orange";
+                    }
+                }
+
+                // Disable appending of new character
+                document.getElementById("append").disabled = true;
+                //document.getElementById("char_input").disabled = true;
+
+                // Add result on the UI
+                const result_of_each_round = document.getElementById("resultOfEachRound");
+                if (p1_turn) {
+                    result_of_each_round.innerHTML = 'P1 Lose';
+                    p2_score += 1;
+                    document.getElementById('p2_score').innerHTML = 'P2 Score: ' + p2_score;
+                } else {
+                    result_of_each_round.innerHTML = 'P2 Lose';
+                    p1_score += 1;
+                    document.getElementById('p1_score').innerHTML = 'P1 Score: ' + p1_score;
+                }
+                console.log("p1_score " + p1_score);
+                console.log("p2_score " + p2_score);
+                // only allow to start new round till round number is 3.
+                if (round_num < 3) {
+                    // Add a button on UI to start a new round
+                    const start_new_round_button = document.createElement("button");
+                    start_new_round_button.setAttribute('id', 'start_new_round_button');
+                    start_new_round_button.setAttribute('class', 'start_new_round_button');
+                    start_new_round_button.onclick = function () {
+                        result_of_each_round.innerHTML = '';
+                        document.getElementById("append").disabled = false;
+                        //document.getElementById("char_input").disabled = false;
+                        start_new_round_button.remove();
+                        removeElementsByClass("square");
+                        round_num += 1;
+                        document.getElementById('round_num').innerHTML = 'Round Number: ' + round_num;
+                        document.getElementById("basicInfoTwoPlayer").innerHTML = 'P1 turn';
+                    };
+                    start_new_round_button.innerHTML = 'Start Next Round!';
+                    const start_of_new_round = document.getElementById("startOfNewRound");
+                    start_of_new_round.appendChild(start_new_round_button);
+
+                    // reset variables as the new round will start
+                    string_so_far = "";
+                    p1_turn = true;
+                    length_of_string = 0;
+                    p1_triesChange = 3;
+                    p2_triesChange = 3; 
+                } else {
+                    if (p1_score > p2_score) {
+                        document.getElementById("winner_section").innerHTML = 'P1 is the winner'
+                    }
+                    else {
+                        document.getElementById("winner_section").innerHTML = 'P2 is the winner'
+                    }
+                }
+            }
+        }
+
+        // function to append the character
+        function appendChar() {
+
+            if (k_input == null || characterinput == null) {
+                alert('k-input and char-set-input need to be filled')
+                return;
+            }
+
+            // get the input from ui
+            const curr_char = characterinput;
+
+            // if append input character is not valid do nothing and return.
+            if (!validateAppendCharInput(curr_char)) {
+                alert('1. char-input should be single capitalized letter.')
+                return;
+            }
+
+            // keep switching the player every time append is done
+            p1_turn = !p1_turn;
+            if (p1_turn) {
+                document.getElementById("basicInfoTwoPlayer").innerHTML = 'P1 turn';
+            } else {
+                document.getElementById("basicInfoTwoPlayer").innerHTML = 'P2 turn';
+            }
+
+            string_so_far += curr_char;
+
+            // Add a new square element on ui with new appended character by the player
+            const sq_div = document.createElement("div");
+            length_of_string += 1;
+            sq_div.setAttribute('id', length_of_string);
+            sq_div.addEventListener("click", createChangeChar(length_of_string));
+            sq_div.setAttribute('class', "square");
+            sq_div.style.padding = "2%";
+            sq_div.style.margin = "1%";
+            sq_div.innerHTML = curr_char;
+            const sq_container = document.getElementById("square_container");
+            sq_container.appendChild(sq_div);
+
+            // reset the textbox to empty value for next append
+            //document.getElementById("char_input").value = '';
+            characterinput = null;
+
+            // Check if the appended character is Valid or Not
+            if (validate(parseInt(k_input), charset_input.split(','), string_so_far) == false) {
+
+                if (repeatedSubstring(parseInt(k_input), charset_input.split(','), string_so_far)) {
+                    const [first, second] = repeatedSubstring(parseInt(k_input), charset_input.split(','), string_so_far);
+                    for (let i = first; i < first + parseInt(k_input); i++) {
+                        document.getElementById(`${i + 1}`).style.color = "orange";
+                    }
+
+                    for (let i = second; i < second + parseInt(k_input); i++) {
+                        document.getElementById(`${i + 1}`).style.color = "orange";
+                    }
+                }
+
+                // Disable appending of new character
+                document.getElementById("append").disabled = true;
+                //document.getElementById("char_input").disabled = true;
+
+                // Add result on the UI
+                const result_of_each_round = document.getElementById("resultOfEachRound");
+                if (!p1_turn) {
+                    result_of_each_round.innerHTML = 'P1 Lose';
+                    p2_score += 1;
+                    document.getElementById('p2_score').innerHTML = 'P2 Score: ' + p2_score;
+                } else {
+                    result_of_each_round.innerHTML = 'P2 Lose';
+                    p1_score += 1;
+                    document.getElementById('p1_score').innerHTML = 'P1 Score: ' + p1_score;
+                }
+                console.log("p1_score " + p1_score);
+                console.log("p2_score " + p2_score);
+                // only allow to start new round till round number is 3.
+                if (round_num < 3) {
+                    // Add a button on UI to start a new round
+                    const start_new_round_button = document.createElement("button");
+                    start_new_round_button.setAttribute('id', 'start_new_round_button');
+                    start_new_round_button.setAttribute('class', 'start_new_round_button');
+                    start_new_round_button.onclick = function () {
+                        result_of_each_round.innerHTML = '';
+                        document.getElementById("append").disabled = false;
+                        //document.getElementById("char_input").disabled = false;
+                        start_new_round_button.remove();
+                        removeElementsByClass("square");
+                        round_num += 1;
+                        document.getElementById('round_num').innerHTML = 'Round Number: ' + round_num;
+                        document.getElementById("basicInfoTwoPlayer").innerHTML = 'P1 turn';
+                    };
+                    start_new_round_button.innerHTML = 'Start Next Round!';
+                    const start_of_new_round = document.getElementById("startOfNewRound");
+                    start_of_new_round.appendChild(start_new_round_button);
+
+                    // reset variables as the new round will start
+                    string_so_far = "";
+                    p1_turn = true;
+                    length_of_string = 0;
+                    p1_triesChange = 3;
+                    p2_triesChange = 3; 
+                } else {
+                    if (p1_score > p2_score) {
+                        document.getElementById("winner_section").innerHTML = 'P1 is the winner'
+                    }
+                    else {
+                        document.getElementById("winner_section").innerHTML = 'P2 is the winner'
+                    }
+                }
+            }
+        }
+
+        // function to remove html elements from ui by classname
+        function removeElementsByClass(className) {
+            var elements = document.getElementsByClassName(className);
+            while (elements.length > 0) {
+                elements[0].parentNode.removeChild(elements[0]);
+            }
+        }
+
+        // function to validate that if string is having repeation of subtring of length k.
+        // length -> longest length of substring allowed
+        // possible -> valid characters we can choose from
+        // curr -> current string we have
+        function validate(k_input, possible, curr) {
+            substrings = new Set();
+            for (let i = 0; i < curr.length; i++) {
+                if (!possible.includes(curr[i])) {
+                    return false;
+                }
+                if (substrings.has(curr.slice(i, i + k_input))) {
+                    return false;
+                }
+                if (curr.slice(i, i + k_input).length == k_input) {
+                    substrings.add(curr.slice(i, i + k_input));
+                }
+            }
+            return true;
+        }
+
+        function repeatedSubstring(k_input, possible, curr) {
+            substrings = new Map();
+            for (let i = 0; i < curr.length; i++) {
+                if (substrings.has(curr.slice(i, i + k_input))) {
+                    return [substrings.get(curr.slice(i, i + k_input)), i];
+                }
+                if (curr.slice(i, i + k_input).length == k_input) {
+                    substrings.set(curr.slice(i, i + k_input), i);
+                }
+            }
+        }
+
+        function createBoxElement(value, id, eventHandler) {
+            const box = document.createElement("div");
+            box.setAttribute('id', id);
+            box.addEventListener("click", eventHandler);
+            box.style.display = "inline-block";
+            box.style.border = "2px solid red";
+            box.style.margin = "1%";
+            box.style.height = "20%";
+            box.style.width = "8%";
+            box.innerHTML = value;
+            return box;
+        }
+
+    </script>
+</body>

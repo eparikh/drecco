@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>No Escape</title>
+        <script src="js/jquery-2.2.4.min.js"></script>
+        <script src="js/facebox.js"></script>
+        <script src="js/gameSettings.js"></script>
+        <link rel="stylesheet" href="css/bootstrap.css">
+        <link rel="stylesheet" type="text/css" href="css/facebox.css"/>
+        <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+        <script>
+            $(document).ready(function() {
+                $.getScript("noescape_final.js");
+            });
+        </script>
+        <!-- <script type="text/javascript" src="noescape_final.js"></script> -->
+        <style>
+            body {
+                margin: 0;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+            #difficulty-level {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            #game-body {
+                flex-grow: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 3rem;
+            }
+            #main-game-container {
+                margin: auto;
+            }
+        </style>
+    </head>
+    <body>
+            <div id="difficulty-level" class="container-fluid well">
+                <div>
+                <span>Difficulty Level</span>
+                <button class="diff btn btn-primary">1</button>
+                <button class="diff btn btn-primary">2</button>
+                <button class="diff btn btn-primary">3</button>
+                <button class="diff btn btn-primary">4</button>
+                <button class="diff btn btn-primary">5</button>
+                </div>
+            </div>
+
+            <div id="game-body">
+            <div id="main-game-container">
+            <div id="warning" style="color:red;margin-left:7px;opacity:0;"><strong>Warning, this maze may have no escape! Good luck.</strong></div>
+            <div style="float:left;width:525px">
+                <canvas id="game" width="525px" height="525px" style="background-color:#ccc"></canvas>
+            </div>
+            <div class="container-fluid well" style="float:left;margin-top:7px">
+                <button class="btn btn-primary btn-sm" id="restart">Restart Game</button>
+                <br><br>
+                <div id="score"><strong>Score:</strong> <span class="result">0</span></div>
+                <div id="phases"><strong>Phases Used:</strong> <span class="result">0</span>/5</div>
+                <div id="state"><strong>Game State:</strong> <span class="result">Playing.</span></div>
+                <br>
+                <button id="savescore" class="btn btn-primary btn-sm" style="display:block">Save Score!</button>
+            </div>
+            </div></div>
+            <script>document.getElementById("game").focus();</script>
+    </body>
+</html>

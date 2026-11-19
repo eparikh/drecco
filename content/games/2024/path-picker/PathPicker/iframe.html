@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Path Picker</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="final_result">
+      <h2>Final Results</h2>
+      <table id="gameScores">
+        <tr>
+          <th></th>
+          <th id="tablePlayer1Name">Player 1</th>
+          <th id="tablePlayer2Name">Player 2</th>
+        </tr>
+        <tr>
+          <td>Stage 1</td>
+          <td id="game1Player1">10</td>
+          <td id="game1Player2">15</td>
+        </tr>
+        <tr>
+          <td>Stage 2</td>
+          <td id="game2Player1">20</td>
+          <td id="game2Player2">25</td>
+        </tr>
+        <tr>
+          <td>Total</td>
+          <td id="totalPlayer1">30</td>
+          <td id="totalPlayer2">40</td>
+        </tr>
+      </table>
+      <h2 id="final-result-text"></h2>
+      <button id="replay">Replay</button>
+    </div>
+    <div id="intermission">
+      <p id="game1_result"></p>
+      <button id="start_game2">Start Stage 2</button>
+    </div>
+    <div id="parameter-modal">
+      <h2>Set Game Parameters</h2>
+      <form id="param-form">
+        <label for="player1Name">Player 1 Name:</label>
+        <input
+          type="player1Name"
+          id="player1Name"
+          name="player1Name"
+          required
+        />
+        <br /><br />
+        <label for="player2Name">Player 2 Name:</label>
+        <input type="text" id="player2Name" name="player2Name" required />
+        <br /><br />
+        <label for="gridSize">Grid Size:</label>
+        <input
+          type="number"
+          id="gridSize"
+          name="gridSize"
+          min="10"
+          value="11"
+          required
+        />
+        <br /><br />
+        <label for="totalTreasures">Total Treasure:</label>
+        <input
+          type="number"
+          id="totalTreasures"
+          name="totalTreasures"
+          value="5"
+          required
+        />
+        <br /><br />
+        <label for="totalWalls">Total Walls:</label>
+        <input
+          type="number"
+          id="totalWalls"
+          name="totalWalls"
+          value="5"
+          required
+        />
+        <br /><br />
+        <label for="totalTeleports">Total Teleports:</label>
+        <input
+          type="number"
+          id="totalTeleports"
+          name="totalTeleports"
+          min="2"
+          value="3"
+          required
+        />
+        <br /><br />
+        <button type="button" id="startGameButton">Start Game</button>
+        <p id="params-invalid-error"></p>
+      </form>
+    </div>
+    <div id="overlay"></div>
+    <div id="game-state">
+      <h1>Adventure of a Lifetime</h1>
+      <p id="treasure-heading"></p>
+      <h2 id="game-count">Stage 1</h2>
+      <div id="score-container">
+        <div id="score-heading">
+          <img
+            src="assets/adventurer_m.png"
+            alt="Player 1 Icon"
+            class="player-icon"
+          />
+          <p id="player1-name">Player1</p>
+          <p id="player1-score">0</p>
+        </div>
+        <div id="score-heading">
+          <img
+            src="assets/adventurer_f.png"
+            alt="Player 1 Icon"
+            class="player-icon"
+          />
+          <p id="player2-name">Player2</p>
+          <p id="player2-score">0</p>
+        </div>
+      </div>
+      <div id="game-container">
+        <div id="grid"></div>
+        <div id="grid-info">
+          <div id="controls">
+            <div id="controls-p1">
+              <img
+                id="player1-img"
+                src="assets/adventurer_m.png"
+                alt="Player 1 Icon"
+                class="player-icon"
+              />
+              <h2><span id="move-placeholder1">Make a Move</span></h2>
+              <p id="move-error1">Invalid Move!</p>
+              <div id="buttons1">
+                <button onclick="movePlayer(1, 'up')">Up</button>
+                <button onclick="movePlayer(1, 'down')">Down</button>
+                <button onclick="movePlayer(1, 'left')">Left</button>
+                <button onclick="movePlayer(1, 'right')">Right</button>
+              </div>
+            </div>
+            <div id="controls-p2">
+              <img
+                id="player2-img"
+                src="assets/adventurer_f.png"
+                alt="Player 2 Icon"
+                class="player-icon"
+              />
+              <h2><span id="move-placeholder2">Make a Move</span></h2>
+              <p id="move-error2">Invalid Move!</p>
+              <div id="buttons2">
+                <button onclick="movePlayer(2, 'up')">Up</button>
+                <button onclick="movePlayer(2, 'down')">Down</button>
+                <button onclick="movePlayer(2, 'left')">Left</button>
+                <button onclick="movePlayer(2, 'right')">Right</button>
+              </div>
+            </div>
+          </div>
+          <div id="result">
+            <img
+              id="result-img"
+              src="assets/adventurer_m.png"
+              alt="Winner Icon"
+              class="player-icon"
+            />
+            <h2 id="result-text">Wins Stage 1</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

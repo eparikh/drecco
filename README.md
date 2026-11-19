@@ -2,9 +2,9 @@
 
 This is the source code for the Dr Ecco Omniheurist website for hosting final projects for *Heuristic Problem Solving* at NYU.
 
-The GitHub repo is currently hosted at [https://github.com/wjmn/drecco](https://github.com/wjmn/drecco). 
+Originally built by [wjmn](https://github.com/wjmn/drecco) (2023). This fork is the 2026 class platform and **includes every published game from 2016–2025** (2024 and 2025 were reconstructed from the live site's built pages).
 
-**NOTE**: none of the actual games are stored in this repository (except for a single example game, Gomoku). Games must be added into the `content/games` folder (see Adding Games below) and the site must then be rebuilt (see Development below - it's just one command). 
+**Students adding a game: read [CONTRIBUTING.md](CONTRIBUTING.md).** A starter game folder is in `game-template/MyGame/`.
 
 # Development
 

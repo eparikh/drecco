@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Title on browser tab -->
+<head>
+	<meta charset="utf-8" />
+	<title>Candy Heist</title>
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="shortcut icon" href="images/favicon.jpg">
+</head>
+
+<body id="body">
+
+	<!-- Title -->
+	<nav class="navbar navbar-inverse">
+		<div class="container-fluid">
+			<div id="topTitle">Candy Heist</div>
+		</div>
+	</nav>
+
+	<div id="sectionContainer" class="container-fluid text-center">
+		<div id="main" class="container">
+
+			<!-- Candy -->
+			<div id="candyAreaL" class="col-sm-1 sidenav">
+				<div id="c1" class="candy">
+					<img src="images/kiss1.png" style="width:100%"/>
+				</div>
+				<div id="c2" class="candy">
+					<img src="images/kiss1.png" style="width:100%"/>
+				</div>
+				<div id="c3" class="candy">
+					<img src="images/kiss1.png" style="width:100%"/>
+				</div>
+			</div>
+
+			<div id="gameArea" class="col-sm-9 text-center" class="span4">
+
+				<!-- Row 1: Game Info -->
+				<div id="rowOne" class="container" class="span5">
+					<div id="candyL">
+						<img src="images/kiss1.png" style="width:50px"/>
+					</div>
+					<button id="settingsButton" type="button" class="btn btn-primary" data-container="body" data-toggle="popover">
+						Settings
+					</button>
+					<button id="instructionsButton" type="button" class="btn btn-primary" data-container="body" data-toggle="popover">
+						Instructions
+					</button>
+					<div id="candyR">
+						<img src="images/kiss1.png" style="width:50px"/>
+					</div>
+				</div>
+
+				<!-- Row 2: Time Info -->
+				<div id="rowTwo">
+					<button id="startButton" type="button" class="btn btn-primary">Start</button>
+					<div id="timeDisplay">00:00</div>
+					<button id="resetButton" type="button" class="btn btn-primary">Reset</button>
+				</div>
+
+			</div>
+
+			<!-- Candy -->
+			<div id="candyAreaR" class="col-sm-1 sidenav">
+				<div id="c4" class="candy">
+					<img src="images/kiss1.png" style="width:100%"/>
+				</div>
+				<div id="c5" class="candy">
+					<img src="images/kiss1.png" style="width:100%"/>
+				</div>
+				<div id="c6" class="candy">
+					<img src="images/kiss1.png" style="width:100%"/>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+	<!-- Popover for settings -->
+	<div id="settingsPopoverContent" class="hide">
+		<button type="button" id="close" class="close" onclick='$(&quot;#settingsButton&quot;).popover(&quot;hide&quot;);'>&times;</button>
+		<h3 class="media-heading">Settings</h3>
+		<p>Set opponents' laser speed.</p>
+		<div id="radioPadding">
+			<form>
+				<input type="radio" id="slowSpeed" name="speed" value="slow" onClick="changeGlobalSpeedSetting()">  Slow<br>
+				<input type="radio" id="mediumSpeed" name="speed" value="medium" onclick="changeGlobalSpeedSetting()">  Medium [default]<br>
+				<input type="radio" id="fastSpeed" name="speed" value="fast" onClick="changeGlobalSpeedSetting()">  Fast<br>
+			</form>
+		</div>
+		<p>Set speed when game is not in progress.</p>
+	</div>
+
+	<!-- Content for instructions -->
+	<div id="instructionsPopoverContent" class="hide">
+		<button type="button" id="close" class="close" onclick="$(&quot;#instructionsButton&quot;).popover(&quot;hide&quot;);">&times;</button>
+		<h3 class='media-heading'>Instructions</h3>
+		<p>Reach the candy while avoiding opponents and lasers!  Use arrow keys to move the player.</p>
+		<img src="images/legend.png" style="width:47%">
+	</div>
+
+	<footer id="footer" class="container" class="span5">
+		<div id="c7" class="candy">
+			<img src="images/kiss1.png" style="width:50px"/>
+		</div>
+		<div id="c8" class="candy">
+			<img src="images/kiss1.png" style="width:50px"/>
+		</div>
+		<div id="c9" class="candy">
+			<img src="images/kiss1.png" style="width:50px"/>
+		</div>
+	</footer>
+
+	<!-- Javascript Files -->
+	<script type="text/javascript" src="board.js"></script>
+	<script type="text/javascript" src="target.js"></script>
+	<script type="text/javascript" src="checkpoint.js"></script>
+	<script type="text/javascript" src="player.js"></script>
+	<script type="text/javascript" src="opponent.js"></script>
+	<script type="text/javascript" src="game.js"></script>
+	<script type="text/javascript" src="heist.js"></script>
+
+	<!-- Javascript for jquery and bootstrap -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+	<!-- Popover for settings -->
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$("#settingsButton").popover({
+				placement: "left",
+				html: true,
+				content: function() { return $("#settingsPopoverContent").html(); }
+			});
+		});
+		// When game is not in progress, changing radio button selection will set global speed selection
+		function changeGlobalSpeedSetting() {
+			if (game !== null && !game.gameInProgress) {
+				speedSelected = document.querySelector("input[name=speed]:checked").value;
+			}
+		}
+	</script>
+
+	<!-- Popover for instructions -->
+	<script type="text/javascript">
+	$(document).ready(function(){
+		$("#instructionsButton").popover({
+			placement: "right",
+			html: true,
+			content: function() { return $("#instructionsPopoverContent").html(); }
+		});
+	});
+	</script>
+
+</body>
+
+</html>

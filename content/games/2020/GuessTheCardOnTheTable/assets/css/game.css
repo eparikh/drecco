@@ -1,0 +1,102 @@
+body {
+	background: rgba(0,0,0,.05);
+}
+
+.container-fluid {
+	margin-top: 1%;
+}
+
+.information {
+	background: rgba(0,0,0, .1);
+	border-radius: 10px;
+	height: 500px;
+}
+
+.center {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	width: 50%;
+  }
+
+.information-header {
+	margin-bottom: 10%;
+}
+
+#error-container {
+	margin-top: 5%;
+	margin-bottom: 0;
+	border-radius: 10px;
+	display: none;
+}
+
+.game {
+	height: 500px;
+	background: rgba(0,0,0, .1);
+	border-radius: 10px;
+}
+
+.game-board-display {
+	min-height: 400px;
+	text-align: center;
+}
+
+.game-title {
+	text-align: center;
+}
+
+.figure-image {
+	max-width: 100px;
+    height: auto;
+    padding-top: 130px;
+}
+
+.dialog-image {
+	max-width: 220px;
+    height: auto;
+    padding-top: 50px;
+}
+
+.dialog-container {
+	position: relative;
+  	text-align: center;
+}
+.dialog-text {
+	margin-top: -300px;
+    margin-left: 40px;
+    width: 150px;
+}
+
+.card-image {
+	margin-top: 200px;
+    max-width: 70px;
+    height: auto;
+}
+
+input.info-input.form-control {
+	border-radius: 10px;
+}
+
+input.game-input {
+	border-radius: 10px;
+	width: 40px;
+}
+
+button.start-game {
+	float: right;
+	margin: 5% 0;
+	border-radius: 10px;
+	border: 1px solid rgba(0,0,0,.3);
+}
+
+button.next {
+	float: right;
+	margin: 5% 0;
+	border-radius: 10px;
+	border: 1px solid rgba(0,0,0,.3);
+}
+
+.btn-container {
+	overflow: auto;
+	position: relative;
+}

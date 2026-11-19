@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Dr Ecco - Quoridor+</title>
+  <link rel="stylesheet" href=https://cims.nyu.edu/~psc9362/drecco/styles.css>
+</head>
+
+<body>
+
+  <header>
+    <div class="center">
+        <a href="https:&#x2F;&#x2F;cims.nyu.edu&#x2F;~psc9362&#x2F;drecco&#x2F;" id="banner-link">
+            <img id="banner" src=https://cims.nyu.edu/~psc9362/drecco/banner.png alt="Dr Ecco banner">
+        </a>
+    </div>
+  </header>
+
+
+  <section id="content">
+    
+
+  <div class="game-page-top">
+    <h2 class="game-page-title">Quoridor+</h2>
+    <h3 class="game-page-team">Ottawa</h2>
+  </div>
+
+  <div class="game-page-content">
+    <!-- Iframe (with potentially a custom height). The iframe container ratio needs to match the iframe ratio. -->
+    <div id="game-page-iframe-container"
+
+      >
+
+      <iframe id="game-page-iframe" src="https:&#x2F;&#x2F;cims.nyu.edu&#x2F;~psc9362&#x2F;drecco&#x2F;games&#x2F;2024&#x2F;qplus&#x2F;build&#x2F;/iframe.html"
+        
+      ></iframe></div>
+    <div id="popup-button-container">
+      <button id="popup-button" onClick="popup()">Open Game in Popup Window</button>
+    </div>
+    <div id="game-instructions">
+      <h1 id="rules">Rules</h1>
+<p>Quoridor, but now you are going in adjacent directions and you can choose your starting location. The object of the game for both players is to advance your pawn to the opposite edge of the board. On your turn you may either move your pawn or place a wall. You may hinder your opponent with wall placement, but not completely block them off.</p>
+<h3 id="general">General</h3>
+<p>During Setup, two players place their pawn on the first row and column respectively. Then On each turn, a player can either advance their pawn one square or place down a wall. The first player to reach their opposite edge first wins.</p>
+<h3 id="pawn-moves">Pawn Moves</h3>
+<p>To advance a pawn, click on your pawn to select it, then click on one of the indicated legal positions to move it. Click the pawn again to deselect it. A pawn can move to squares adjacent to it in the cardinal directions with one exception. If two pawns face each other on neighbouring squares which are not separated by a wall, the player whose turn it is can jump over the opponent’s pawn (and place himself behind him) regardless if there is a wall behind the opposing player's pawn.</p>
+<h3 id="walls">Walls</h3>
+<p>Walls are 1 x 2 and must be placed in the spaces between the square. Total number of walls available to each player is the side length of the board + 1. To place a wall, click on one of the gaps between the squares to place the first half of a wall, click on an adjacent gap to finish placing the wall or click the wall again to cancel placement. If placing a wall would result in either player becoming unable to reach their opposite edge (thus unable to win the game) then the wall will disappear upon placement and the player then choose to make another move instead.</p>
+
+    </div>
+  </div>
+
+  <!-- Game Popup Button -->
+  <!-- Opens up the game (as long as the game path is in iframe.html relative to the game directory) -->
+  <script>
+      function popup() { 
+          var params = ['height='+screen.height, 'width='+screen.width, 'fullscreen=yes' ].join(',');
+          var newWindow = window.open("iframe.html", "Game", params); 
+          newWindow.moveTo(0,0) 
+      }
+  </script>
+
+
+
+
+  </section>
+
+  <footer>
+    <div class="center">
+      Heuristic Problem Solving @ NYU (2023) ∎
+    </div>
+  </footer>
+
+</body>
+
+</html>

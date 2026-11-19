@@ -1,0 +1,269 @@
+th {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    padding-left: 20px;
+    padding-right: 30px;
+}
+
+td {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    padding-left: 30px;
+    padding-right: 20px;
+}
+
+.gunman-1 {
+    transform: rotateY(180deg);
+    width: 12%;
+    position: absolute;
+    left: 10%;
+    top: 68%;
+}
+
+.gunman-2 {
+    width: 12%;
+    position: absolute;
+    right: 10%;
+    top: 68%;
+}
+
+.bullet-1 {
+    width: 3%;
+    position: absolute;
+    left: 18%;
+    top: 75%;
+    opacity: 0;
+}
+
+.bullet-2 {
+    transform: rotateY(180deg);
+    width: 3%;
+    position: absolute;
+    right: 18%;
+    top: 75%;
+    opacity: 0;
+}
+
+.shootbutton {
+    display: inline-block;
+    outline: 0;
+    cursor: pointer;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    vertical-align: middle;
+    border: 1px solid;
+    border-radius: 6px;
+    color: #ffffff;
+    background-color: #2ea44f;
+    border-color: #1b1f2326;
+    box-shadow: rgba(27, 31, 35, 0.04) 0px 1px 0px 0px, rgba(255, 255, 255, 0.25) 0px 1px 0px 0px inset;
+    transition: 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+    transition-property: color, background-color, border-color;
+}
+
+.shootbutton:hover {
+    background-color: #2c974b;
+    border-color: #1b1f2326;
+    transition-duration: 0.1s;
+}
+
+.shootbutton:disabled {
+    background-color: #71bb86;
+}
+
+.skipbutton {
+    display: inline-block;
+    outline: 0;
+    cursor: pointer;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    vertical-align: middle;
+    border: 1px solid;
+    border-radius: 6px;
+    color: #ffffff;
+    background-color: #D10000;
+    border-color: #1b1f2326;
+    box-shadow: rgba(27, 31, 35, 0.04) 0px 1px 0px 0px, rgba(255, 255, 255, 0.25) 0px 1px 0px 0px inset;
+    transition: 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+    transition-property: color, background-color, border-color;
+}
+
+.skipbutton:hover {
+    background-color: #A30000;
+    border-color: #1b1f2326;
+    transition-duration: 0.1s;
+}
+
+.skipbutton:disabled {
+    background-color: #da8181;
+}
+
+.jacket-1-text {
+    position: absolute;
+    top: 25%;
+    left: 10%;
+}
+
+.jacket-1 {
+    position: absolute;
+    top: 29%;
+    left: 12%;
+}
+
+.shoot-1 {
+    position: absolute;
+    top: 25%;
+    left: 18%;
+}
+
+.skip-1 {
+    position: absolute;
+    top: 25%;
+    left: 25%;
+}
+
+.jacket-2-text {
+    position: absolute;
+    top: 25%;
+    right: 25%;
+}
+
+.jacket-2 {
+    position: absolute;
+    top: 29%;
+    right: 26%;
+}
+
+.shoot-2 {
+    position: absolute;
+    top: 25%;
+    right: 17%;
+}
+
+.skip-2 {
+    position: absolute;
+    top: 25%;
+    right: 10%;
+}
+
+.scoreboard {
+    background:#7f7f7f;
+    background:rgba(0,0,0,0.5);
+}
+
+.scoreboard-1 {
+    position: absolute;
+    top:8%;
+    left: 10%;
+}
+
+.scoreboard-2 {
+    position: absolute;
+    top:8%;
+    right: 10%;
+}
+
+.scoreboard-common {
+    position: absolute;
+    top:10%;
+    right: 40%;
+}
+
+.font {
+    color: #ffffff;
+    font-family: cursive;
+    font-size: 20px;
+}
+
+.font-common {
+    color: #ffffff;
+    font-family: cursive;
+    font-size: 25px;
+}
+
+.font-gameover {
+    color: #ffffff;
+    font-family: cursive;
+    font-size: 35px;
+    text-align: center;
+}
+
+.gameover {
+    position: absolute;
+    padding-top: 50px;
+    padding-bottom: 50px;
+    padding-left: 100px;
+    padding-right: 100px;
+    left: 0%;
+    top: 40%;
+    background-color: rgba(0,0,0,0.6);
+}
+
+.font-bullets-over {
+    color: #ffffff;
+    font-family: cursive;
+    font-size: 20px;
+    text-align: center;
+}
+
+.initdiv {
+    display:block;
+}
+
+.gamediv {
+    display:none;
+}
+
+.startscreen {
+    margin-left: 30%;
+    margin-right: 30%;
+    width: 30%;
+    height: 30%;
+    margin-top: 10%;
+    margin-bottom: 10%;
+    padding: 5%;
+    background-color: rgba(0,0,0,0.6);
+    color: rgb(255, 150, 0);
+    font-size: 20px;
+}
+
+.playername-1 {
+    position: absolute;
+    padding: 0.1%;
+    padding-left: 4%;
+    padding-right: 4%;
+    left: 10%;
+    top: 2%;
+    width: 16%;
+    font-size: 24px;
+}
+
+.playername-2 {
+    text-align: right;
+    position: absolute;
+    padding: 0.1%;
+    padding-left: 4%;
+    padding-right: 4%;
+    right: 10%;
+    top: 2%;
+    width: 16%;
+    font-size: 24px;
+}
+
+.p1-jacket {
+    width: 9.5%;
+    top: 72.8%;
+    position: absolute;
+    opacity: 0;
+}
+
+.p2-jacket {
+    width: 9.5%;
+    top: 72.8%;
+    position: absolute;
+    opacity: 0;
+}

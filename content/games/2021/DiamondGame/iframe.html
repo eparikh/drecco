@@ -1,0 +1,56 @@
+<html>
+<head>
+    <script src="js/jquery-2.2.4.min.js"></script>
+    <script src="js/gameSettings.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <style>
+        #gameSettings {
+            max-width: 960px;
+            margin: auto;
+            margin-top: 1rem;
+        }
+        .iframe-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 98vh;
+            width: 100vw;
+            margin: 0;
+        }
+
+        html, body {
+            margin: 0;
+        }
+        #game-iframe {
+            margin: 0;
+            padding: 0;
+            border: none;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <form id="gameSettings" class="well"></form>
+    <script type="text/javascript">
+        var player_choices = ['Local Multiplayer', 'Human vs AI', 'AI vs Human'];
+        newSelect('Player Selection',player_choices,'selectPlayer');
+        var difficulty_choices = ['Weak', 'Easy', 'Average','Strong'];
+        newSelect('AI Difficulty Selection',difficulty_choices,'selectDiff');
+        var board_choices = ['9x9','11x11','13x13','15x15','17x17'];
+        newSelect('Board Size',board_choices,'selectBoard');
+        newTextBox("Player 1 Name", 'textBoxP1');
+        newTextBox("Player 2 Name", 'textBoxP2');
+        newStartBtn(['selectPlayer', 'selectDiff', 'selectBoard', 'textBoxP1', 'textBoxP2']); 
+    </script>
+  <center><p><div id="selectPlayer" hidden></div></p></center>
+  <center><p><div id="selectDiff" hidden></div></p></center>
+  <center><p><div id="selectBoard" hidden></div></p></center>
+  <center><p><div id="textBoxP1" hidden></div></p></center>
+  <center><p><div id="textBoxP2" hidden></div></p></center>
+
+    <div class="iframe-container">
+    <iframe id="game-iframe" data-src="game.html" src="about:blank" width="960" height="960">
+    </iframe></div>
+
+</body>
+</html>

@@ -1,0 +1,272 @@
+<html>
+<header>
+</header>
+<body>
+  <style>
+    body {
+      background-color: #CC8B8C;
+    }
+
+    table, th, td {
+      border: 5px inset #3D348B;
+      border-collapse: collapse;
+      padding: 10px;
+      background-color: #7678ED;
+      box-shadow: 0 10px 10px rgba(0,0,0,0.2);
+    }
+
+    .corner {
+      background-color: #ECC30B;
+    }
+
+    input[type="button"] {
+      height: 30px;
+      width: 30px;
+      border-radius: 50%;
+      transition-duration: 0.4s;
+    }
+
+    .free_slot {
+      visibility: hidden;
+      background-color: #7678ED;
+    }
+
+    .free_corner {
+      visibility: hidden;
+      background-color: #ECC30B;
+    }
+
+    .open1 {
+      border: 1px solid white;
+      background-color: rgba(255,255,255,0.1);
+    }
+
+    .open1:hover {
+      border: 1px solid white;
+      box-shadow: 1px 2px 1px 2px rgba(74, 75, 75, 0.5);
+      background:linear-gradient(rgba(255, 255, 255, 0.5), rgba(216, 210, 216, 0.5));
+    }
+ 
+    .open2 {
+      border: 1px solid black;
+      background-color: rgba(0,0,0,0.1);
+    }
+
+    .open2:hover {
+      border: 1px solid black;
+      box-shadow: 1px 2px 1px 2px rgba(74, 75, 75, 0.5);
+      background:linear-gradient(rgba(50, 50, 50, 0.5), rgba(0, 0, 0, 0.5));
+    }
+
+    .piece1 {
+      border: 1px solid white;
+      box-shadow: 1px 2px 1px 2px rgba(74, 75, 75, 1);
+      background:linear-gradient(rgba(255, 255, 255, 1), rgba(216, 210, 216, 1));
+    }
+
+    .piece2 {
+      border: 1px solid black;
+      box-shadow: 1px 2px 1px 2px rgba(74, 75, 75, 1);
+      background:linear-gradient(rgba(50, 50, 50, 1), rgba(0, 0, 0, 1));
+    }
+  </style>
+  <center><h1>Diamond Game</h1></center>
+  <center><table id="board"></table></center>
+  <center><p id="status_msg"></p></center>
+  <center><p><div id="selectPlayer" hidden></div></p></center>
+  <center><p><div id="selectDiff" hidden></div></p></center>
+  <center><p><div id="selectBoard" hidden></div></p></center>
+  <center><p><div id="textBoxP1" hidden></div></p></center>
+  <center><p><div id="textBoxP2" hidden></div></p></center>
+
+  <script type="text/javascript">
+    // GLOBAL VARS
+    var player1human = true;
+    var player2human = true;
+    var player_names = [':)','Player 1','Player 2']
+    var difficulty = -1;
+    var board_width = 0;
+    var board = [];
+    var current_turn = 2;
+
+    var w;
+
+    function set_status_message(msg) {
+      document.getElementById("status_msg").innerHTML = msg;
+    }
+
+    // macro to handle issues with searching past edge
+    function get_board(x,y) {
+      if(x >= 0 && x < board_width &&
+         y >= 0 && y < board_width) {
+        return board[y][x];
+      } else {
+        return -1;
+      }
+    }
+
+    function win_centered(x, y) {
+      let goal = get_board(x - 1, y);
+      return (goal == 1 || goal == 2) &&
+             goal == get_board(x + 1, y    ) &&
+             goal == get_board(x    , y - 1) &&
+             goal == get_board(x    , y + 1);
+    }
+
+    // determine if a win occurs
+    function check_for_win(x, y) {
+      // check corners
+      if(x % (board_width - 1) == 0 &&
+         y % (board_width - 1) == 0) {
+           return true;
+      }
+      return win_centered(x - 1, y    ) ||
+             win_centered(x + 1, y    ) ||
+             win_centered(x    , y - 1) ||
+             win_centered(x    , y + 1);
+    }
+
+    function attempt_open_location(x, y) {
+      if(get_board(x,y) == 0) {
+        document.getElementById(x + "bt" + y).className = "open" + current_turn;
+      }
+    }
+
+    function run_AI() {
+      if(typeof(Worker) !== "undefined") {
+        if(typeof(w) == "undefined") {
+          w = new Worker("board_worker.js");
+        }
+        w.postMessage({ boardstr: board.toString(), board_width: board_width, current_turn: current_turn , difficulty: difficulty});
+        set_status_message(player_names[current_turn] + " is thinking...");
+        w.onmessage = function(event) {
+          console.log(event.data.next_move);
+          place_piece(event.data.next_move.x,event.data.next_move.y);
+        }
+      }
+      /*let tx = -1;
+      let ty = -1;
+      do {
+        tx = Math.floor(board_width * Math.random());
+        ty = Math.floor(board_width * Math.random());
+      } while(get_board(tx,ty) != 0 || document.getElementById(tx + "bt" + ty).className != "open" + current_turn);
+      place_piece(tx,ty);*/
+    }
+
+    function enable_disable(disabled) {
+      let open = document.getElementsByClassName("open" + current_turn);
+      for(let i = open.length - 1; i >= 0; i--) {
+        open[i].disabled = disabled;
+      }
+    }
+
+    function place_piece(x, y) {
+      enable_disable(false);
+      board[y][x] = current_turn;
+      console.log(board);
+      document.getElementById(x + "bt" + y).className = "piece" + current_turn;
+      document.getElementById(x + "bt" + y).disabled = true;
+      if(check_for_win(x, y)) {
+        // to do win stuff
+        let old_open = document.getElementsByClassName("open" + current_turn);
+        for(let i = old_open.length - 1; i >= 0; i--) {
+          old_open[i].className = "free_slot";
+        }
+        set_status_message(player_names[current_turn] + " Wins!");
+        setTimeout(function(){alert(player_names[current_turn] + " Wins!");}, 1000);
+      } else {
+        attempt_open_location(x - 1, y    );
+        attempt_open_location(x + 1, y    );
+        attempt_open_location(x    , y - 1);
+        attempt_open_location(x    , y + 1);
+        let old_open = document.getElementsByClassName("open" + current_turn);
+        current_turn = (current_turn == 1 ? 2 : 1);
+        for(let i = old_open.length - 1; i >= 0; i--) {
+          old_open[i].className = "open" + current_turn;
+        }
+        set_status_message("It is " + player_names[current_turn] + "\'s turn");
+        if((current_turn == 1 && !player1human) ||
+           (current_turn == 2 && !player2human)) {
+          enable_disable(true);
+          run_AI();
+        }
+      }
+    }
+
+    function init_game() {
+      // init global vars
+      board_width = Number(window.parent.document.getElementById("selectBoard").innerHTML.split("x")[0]);
+      let tmp_play_string = window.parent.document.getElementById("selectPlayer").innerHTML.split(" ");
+      if(tmp_play_string.length == 3) {
+        player1human = (tmp_play_string[0] == "Human" ? true : false);
+        player2human = (tmp_play_string[2] == "Human" ? true : false);
+      }
+      
+      if(!player1human) {
+        player_names[1] = window.parent.document.getElementById("selectDiff").innerHTML + " AI";
+      } else if(window.parent.document.getElementById("textBoxP1").innerHTML.length != 0){
+        player_names[1] = window.parent.document.getElementById("textBoxP1").innerHTML;
+      }
+      if(!player2human) {
+        player_names[2] = window.parent.document.getElementById("selectDiff").innerHTML + " AI";
+      } else if(window.parent.document.getElementById("textBoxP2").innerHTML.length != 0){
+        player_names[2] = window.parent.document.getElementById("textBoxP2").innerHTML;
+      }
+
+      switch(window.parent.document.getElementById("selectDiff").innerHTML) {
+        case "Weak":
+          difficulty = 1;
+          break;
+        case "Easy":
+          difficulty = 2;
+          break;
+        case "Average":
+          difficulty = 3;
+          break;
+        case "Strong":
+          difficulty = 4;
+          break;
+        default:
+          difficulty = 0;
+          break;
+      }
+
+      // construct board visuals
+      let tb_ref = document.getElementById('board');
+      for(let y = 0; y < board_width; y++) {
+        let row_ref = tb_ref.insertRow();
+        board[y] = [];
+        for(let x = 0; x < board_width; x++) {
+          let cell_ref = row_ref.insertCell();
+          let btn = document.createElement('input');
+          // special corners
+          if(x % (board_width - 1) == 0 &&
+             y % (board_width - 1) == 0) {
+            cell_ref.className = "corner";
+            btn.className = "free_corner";
+          } else {
+            btn.className = "free_slot";
+          }
+          btn.type = "button";
+          btn.id = x + "bt" + y;
+          btn.onclick = (function() { place_piece(x, y); })
+          board[y][x] = 0;
+          cell_ref.appendChild(btn);
+        }
+      }
+      place_piece(((board_width-1)/2),(board_width-1)/2);
+    }
+    
+    function check_for_param_load() {
+      // mini hack to wait till the values are initialized
+      if(window.parent.document.getElementById("selectBoard").innerHTML.length == 0){ 
+        setTimeout(check_for_param_load, 0);
+      } else {
+        init_game();
+      }
+    }
+
+    check_for_param_load()
+  </script>
+</body>
+<html>

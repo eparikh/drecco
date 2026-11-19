@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>FeedOrStarve - Mass Edition</title>
+    <style>
+        /* Reset and base styles */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            overflow: hidden;
+        }
+
+        /* Setup page styles */
+        #setupPage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-image:
+                    repeating-linear-gradient(
+                            90deg,
+                            rgba(255, 255, 255, 0.1) 0px,
+                            rgba(255, 255, 255, 0.1) 2px,
+                            transparent 2px,
+                            transparent 20px
+                    ),
+                    linear-gradient(to bottom, #7FDBFF, #7FDBFF);
+        }
+
+        #setupContainer {
+            background: #d6effa;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 400px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        #setupContainer h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+
+        #setupContainer p {
+            margin: 10px 0;
+        }
+
+        #setupContainer div {
+            margin: 10px 0;
+        }
+
+        #setupContainer label {
+            display: inline-block;
+            width: 150px;
+            text-align: right;
+            margin-right: 10px;
+        }
+
+        .btn {
+            font-size: 16px;
+            padding: 8px 16px;
+            margin: 10px;
+            cursor: pointer;
+            background: gray;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background 0.3s;
+            display: block;
+            margin: 30px auto 0 auto;
+        }
+
+        .btn:hover {
+            background: #666;
+        }
+
+        .color-btn {
+            margin: 0 5px;
+            width: 30px;
+            height: 30px;
+            border: 2px solid #666;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .color-btn.selected {
+            border: 3px solid #000;
+        }
+
+        /* Game page styles */
+        #gamePage {
+            display: none;
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background-image:
+                    repeating-linear-gradient(
+                            90deg,
+                            rgba(255, 255, 255, 0.1) 0px,
+                            rgba(255, 255, 255, 0.1) 2px,
+                            transparent 2px,
+                            transparent 20px
+                    ),
+                    linear-gradient(to bottom, #7FDBFF, #7FDBFF);
+            overflow: hidden;
+            box-sizing: border-box;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        #infoContainer {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        #infoContainer span {
+            margin: 0 10px;
+        }
+
+        #fishTankContainer {
+            flex: 1 1 auto;
+            width: 90vw;
+            height: 80vh;
+            max-width: 90vw;
+            max-height: 80vh;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            background-image:
+                    repeating-linear-gradient(
+                            90deg,
+                            rgba(255, 255, 255, 0.1) 0px,
+                            rgba(255, 255, 255, 0.1) 2px,
+                            transparent 2px,
+                            transparent 20px
+                    ),
+                    linear-gradient(to bottom, #7FDBFF, #7FDBFF);
+        }
+
+        #p1Info, #p2Info {
+            position: absolute;
+            color: #fff;
+            font-weight: bold;
+            background: rgba(0,0,0,0.3);
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+
+        #p1Info {
+            top: 10px;
+            left: 10px;
+            text-align: left;
+        }
+
+        #p2Info {
+            top: 10px;
+            right: 10px;
+            text-align: right;
+        }
+
+        #boardSizeInfo {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: bold;
+            background: rgba(0,0,0,0.3);
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        #fishTank {
+            position: relative;
+            transform-origin: center center;
+            border: 2px solid #fff;
+            border-radius: 20px;
+            box-sizing: border-box;
+            background: linear-gradient(
+                    to bottom,
+                    /*#1f4366 0%, */
+                    #1482b1 0%,
+                    #18c6e1 50%,
+                    #90e4f4 92%,
+                    #877571 93%,
+                    #d4c4a4 95%,
+                    #d4c4a4 96%,
+                    #877571 100%
+            );
+        }
+
+        .fish {
+            position: absolute;
+            width: 50px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #000000;
+            font-weight: bold;
+            box-sizing: border-box;
+            transition: width 0.3s ease-out, height 0.3s ease-out, transform 0.3s ease-out;
+        }
+
+        /* Fish direction transition */
+        .fish svg {
+            transition: transform 0.3s ease-out;
+            width: 100%;
+            height: 100%;
+            display: block;
+            position: absolute;
+        }
+
+        .mass-display {
+            position: relative;
+            color: black;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 1;
+            text-align: center;
+            text-shadow: none;
+                    /*-1px -1px 0 white,*/
+                    /*1px -1px 0 white,*/
+                    /*-1px 1px 0 white,*/
+                    /*1px 1px 0 white;*/
+        }
+
+        .fish svg path {
+            transform-origin: center;
+            transform: scale(1.0);
+        }
+
+        .fish.facing-left svg {
+            transform: scaleX(-1);
+        }
+
+        @keyframes eatEffect {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .eating {
+            animation: eatEffect 0.3s ease-out;
+        }
+
+        @keyframes flash {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.5); }
+            100% { filter: brightness(1); }
+        }
+
+        .flashing {
+            animation: flash 0.3s ease-out;
+        }
+
+        .food {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            border: 4px solid black;
+            box-sizing: border-box;
+        }
+
+        #gameOverOverlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 40px;
+            font-size: 30px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Setup Page -->
+<div id="setupPage">
+    <div id="setupContainer">
+        <h1>Growth Race</h1>
+        <p>Collect food and grow bigger!</p>
+
+        <div>
+            <label>Board Size:</label>
+            <input type="number" id="boardSize" min="500" max="2000" value="1000"/>
+        </div>
+        <div>
+            <label>Total Food:</label>
+            <input type="number" id="totalFood" value="100"/>
+        </div>
+        <div>
+            <label>Initial Mass:</label>
+            <input type="number" id="initialMass" value="100"/>
+        </div>
+        <div>
+            <label>Mass Loss Rate:</label>
+            <input type="number" id="massLossRate" value="50"/>
+        </div>
+        <div>
+            <label>Base Speed (V0):</label>
+            <input type="number" id="baseSpeed" value="108"/>
+        </div>
+        <div>
+            <label>Min Speed:</label>
+            <input type="number" id="minSpeed" value="1"/>
+        </div>
+
+        <h2>Player 1 Settings</h2>
+        <div>
+            <label>Player 1 Name:</label>
+            <input type="text" id="player1Name" value="Player1"/>
+        </div>
+        <div>
+            <label>Player 1 Color:</label>
+            <div style="display:inline-block;">
+                <div class="color-btn" style="background:#f72c5b;" data-color="#f72c5b" onclick="selectColor('player1Color', this)"></div>
+                <div class="color-btn" style="background:#fcc737;" data-color="#fcc737" onclick="selectColor('player1Color', this)"></div>
+                <div class="color-btn" style="background:#118b50;" data-color="#118b50" onclick="selectColor('player1Color', this)"></div>
+            </div>
+            <input type="color" id="player1Color" value="#f72c5b"/>
+        </div>
+
+        <h2>Player 2 Settings</h2>
+        <div>
+            <label>Player 2 Name:</label>
+            <input type="text" id="player2Name" value="Player2"/>
+        </div>
+        <div>
+            <label>Player 2 Color:</label>
+            <div style="display:inline-block;">
+                <div class="color-btn" style="background:#f72c5b;" data-color="#f72c5b" onclick="selectColor('player2Color', this)"></div>
+                <div class="color-btn" style="background:#fcc737;" data-color="#fcc737" onclick="selectColor('player2Color', this)"></div>
+                <div class="color-btn" style="background:#118b50;" data-color="#118b50" onclick="selectColor('player2Color', this)"></div>
+            </div>
+            <input type="color" id="player2Color" value="#fcc737"/>
+        </div>
+
+        <button id="startGameBtn" class="btn enabled">Start Game</button>
+    </div>
+</div>
+
+<!-- Game Page -->
+<div id="gamePage">
+    <div id="infoContainer">
+        <span id="advantageInfo">Tied</span>
+        <span>|</span>
+        <span>Time Step: <span id="timeStep">0</span></span>
+        <span>|</span>
+        <span>Remaining Food: <span id="remainingFood">0</span></span>
+    </div>
+    <div id="fishTankContainer">
+        <div id="p1Info"></div>
+        <div id="p2Info"></div>
+        <div id="boardSizeInfo"></div>
+        <div id="fishTank"></div>
+    </div>
+    <div style="text-align: center; padding: 10px; color: white; background: rgba(0,0,0,0.3); border-radius: 8px; margin: 10px;">
+        <span id="player1NameSpan"></span> Control Keys: <span style="color: #fcc737;">WASD</span>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<span id="player2NameSpan"></span> Control Keys: <span style="color: #fcc737;">IJKL</span>
+    </div>
+</div>
+
+<script>
+    // Define fish SVG template - Replace YOUR_SVG_PATH_HERE with your actual SVG path data
+    const FISH_SVG = `
+        <svg viewBox="0 0 300 158" preserveAspectRatio="xMidYMid meet">
+        <g transform="translate(0.000000,158.000000) scale(0.100000,-0.100000)">
+            <!-- White stroke outline -->
+            <path d="M1446 1405 c-23 -35 -59 -51 -174 -78 -104 -25 -152 -47 -152 -72 0 -14 56 -35 95 -35 27 -1 105 -37 105 -48 0 -5 -15 -16 -32 -23 -18 -7 -91 -52 -163 -100 -167 -110 -164 -109 -230 -109 -72 0 -105 17 -268 141 -73 55 -168 118 -212 139 -73 35 -209 80 -243 80 -32 0 27 -129 119 -257 80 -113 99 -153 99 -211 0 -53 -28 -108 -108 -212 -78 -101 -142 -260 -142 -352 0 -37 1 -38 28 -32 15 4 64 20 109 36 137 49 265 134 451 299 96 86 135 102 230 97 70 -3 91 -10 247 -79 94 -42 187 -82 207 -88 21 -7 40 -17 44 -22 12 -20 -50 -123 -93 -154 -113 -80 -127 -91 -127 -100 -1 -6 31 -11 71 -13 160 -6 319 67 403 186 14 20 21 21 128 15 81 -4 112 -9 112 -19 0 -7 -18 -50 -40 -95 -39 -80 -53 -159 -30 -159 17 0 146 66 197 101 51 35 160 139 185 176 10 16 41 30 101 48 228 66 482 211 517 294 22 55 6 95 -73 177 -224 237 -551 374 -889 374 -32 0 -62 6 -76 16 -64 45 -258 104 -340 104 -31 0 -43 -5 -56 -25z"
+                fill="currentColor" stroke="white" stroke-width="80"/>
+        </g>
+    </svg>
+    `;
+
+    // Game parameters
+    let gameParams = {
+        gameName: "FeedOrStarve - Mass Edition",
+        gameDesc: "Collect food and grow bigger!",
+        boardSize: 1000,
+        totalFood: 100,
+        initialMass: 100,
+        massLossRate: 50,
+        massLossAmount: 3,
+        baseSpeed: 108,
+        minSpeed: 1,
+        player1Name: "Player1",
+        player1Color: "#ff6f61",
+        player2Name: "Player2",
+        player2Color: "#ffb74d"
+    };
+
+    // Game state variables
+    let timeStep = 0;
+    let remainingFood = 0;
+    let foods = [];
+    let gameOver = false;
+    let keysPressed = {};
+    let fish1El, fish2El;
+    let scaleFactor = 1;
+
+    // Fish objects
+    let fish1 = {
+        name: "",
+        baseColor: "",
+        mass: 100,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        lastMassLossTime: 0,
+        facingLeft: false
+    };
+
+    let fish2 = {
+        name: "",
+        baseColor: "",
+        mass: 100,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        lastMassLossTime: 0,
+        facingLeft: true
+    };
+
+    // Event listeners
+    let startBtn = document.getElementById("startGameBtn");
+    startBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        if (validateColors()) {
+            startGame();
+        }
+    });
+
+    // Store the selected colors for each player
+    let selectedColors = {
+        player1: null,
+        player2: null
+    };
+
+    function selectColor(inputId, el) {
+        const color = el.getAttribute('data-color');
+        const player = inputId.replace('Color', '');
+        const otherPlayer = player === 'player1' ? 'player2' : 'player1';
+
+        if (selectedColors[otherPlayer] === color) {
+            alert('This color is already selected by the other player. Please choose a different color.');
+            return;
+        }
+
+        document.getElementById(inputId).value = color;
+        selectedColors[player] = color;
+
+        // Update selected state for buttons
+        let siblings = el.parentNode.querySelectorAll('.color-btn');
+        siblings.forEach(s => s.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    function validateColors() {
+        const player1Color = document.getElementById('player1Color').value;
+        const player2Color = document.getElementById('player2Color').value;
+
+        if (player1Color === player2Color) {
+            alert('Players cannot have the same color. Please choose different colors.');
+            return false;
+        }
+        return true;
+    }
+
+    // Calculate fish speed based on mass
+    function calculateSpeed(mass) {
+        return gameParams.baseSpeed / Math.pow(mass, 2/3) + gameParams.minSpeed;
+    }
+
+    function startGame() {
+        // Get game parameters from UI
+        gameParams.boardSize = parseInt(document.getElementById("boardSize").value) || 1000;
+        gameParams.totalFood = parseInt(document.getElementById("totalFood").value) || 100;
+        gameParams.initialMass = parseInt(document.getElementById("initialMass").value) || 100;
+        gameParams.massLossRate = parseInt(document.getElementById("massLossRate").value) || 50;
+        gameParams.baseSpeed = parseInt(document.getElementById("baseSpeed").value) || 300;
+        gameParams.minSpeed = parseInt(document.getElementById("minSpeed").value) || 2;
+        gameParams.player1Name = document.getElementById("player1Name").value;
+        gameParams.player1Color = document.getElementById("player1Color").value;
+        gameParams.player2Name = document.getElementById("player2Name").value;
+        gameParams.player2Color = document.getElementById("player2Color").value;
+
+        document.getElementById("setupPage").style.display = "none";
+        document.getElementById("gamePage").style.display = "flex";
+
+        document.getElementById("player1NameSpan").innerText = gameParams.player1Name;
+        document.getElementById("player2NameSpan").innerText = gameParams.player2Name;
+
+        initGame();
+    }
+
+    function initGame() {
+        // Initialize fish tank
+        let fishTank = document.getElementById("fishTank");
+        fishTank.style.width = gameParams.boardSize + "px";
+        fishTank.style.height = gameParams.boardSize + "px";
+
+        // Calculate scale factor
+        let container = document.getElementById("fishTankContainer");
+        let availableWidth = container.clientWidth;
+        let availableHeight = container.clientHeight;
+        scaleFactor = Math.min(
+            (availableWidth - 40) / gameParams.boardSize,
+            (availableHeight - 40) / gameParams.boardSize
+        );
+
+        fishTank.style.transform = `scale(${scaleFactor})`;
+
+        // Initialize fish properties
+        fish1.name = gameParams.player1Name;
+        fish1.baseColor = gameParams.player1Color;
+        fish1.mass = gameParams.initialMass;
+        fish1.x = 0;
+        fish1.y = gameParams.boardSize - 120;
+        fish1.lastMassLossTime = 0;
+        fish1.facingLeft = false;
+
+        fish2.name = gameParams.player2Name;
+        fish2.baseColor = gameParams.player2Color;
+        fish2.mass = gameParams.initialMass;
+        fish2.x = gameParams.boardSize;
+        fish2.y = gameParams.boardSize - 120;
+        fish2.lastMassLossTime = 0;
+        fish2.facingLeft = true;
+
+        remainingFood = gameParams.totalFood;
+        updateUI();
+
+        // Create fish elements with SVG
+        fish1El = document.createElement("div");
+        fish1El.className = "fish";
+        // console.log("Original SVG:", FISH_SVG);
+        fish1El.innerHTML = FISH_SVG;
+        // console.log("Created fish1 element:", fish1El.innerHTML);
+        fish1El.querySelector('path').setAttribute('fill', fish1.baseColor);
+
+        fish2El = document.createElement("div");
+        fish2El.className = "fish facing-left";
+        fish2El.innerHTML = FISH_SVG;
+        fish2El.querySelector('path').setAttribute('fill', fish2.baseColor);
+
+        fishTank.appendChild(fish1El);
+        fishTank.appendChild(fish2El);
+
+        // Set up controls
+        document.addEventListener("keydown", (e) => {
+            keysPressed[e.key] = true;
+        });
+        document.addEventListener("keyup", (e) => {
+            keysPressed[e.key] = false;
+        });
+
+        document.getElementById("boardSizeInfo").innerText =
+            "Board: " + gameParams.boardSize + "x" + gameParams.boardSize;
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    function updateUI() {
+        let timeStepEl = document.getElementById("timeStep");
+        let remainingFoodEl = document.getElementById("remainingFood");
+        let advantageInfoEl = document.getElementById("advantageInfo");
+        let p1InfoEl = document.getElementById("p1Info");
+        let p2InfoEl = document.getElementById("p2Info");
+
+        timeStepEl.innerText = timeStep;
+        remainingFoodEl.innerText = remainingFood;
+
+        // Update leading player info
+        if (fish1.mass > fish2.mass) {
+            advantageInfoEl.innerText = "Leading: " + fish1.name;
+        } else if (fish2.mass > fish1.mass) {
+            advantageInfoEl.innerText = "Leading: " + fish2.name;
+        } else {
+            advantageInfoEl.innerText = "Tied";
+        }
+
+        // Update player info displays
+        p1InfoEl.innerHTML = `${fish1.name}<br>Mass: ${Math.round(fish1.mass)}<br>Speed: ${calculateSpeed(fish1.mass).toFixed(2)}`;
+        p2InfoEl.innerHTML = `${fish2.name}<br>Mass: ${Math.round(fish2.mass)}<br>Speed: ${calculateSpeed(fish2.mass).toFixed(2)}`;
+    }
+
+    // Controls configuration
+    const CONTROLS = {
+        player1: {
+            up: 'w',
+            down: 's',
+            left: 'a',
+            right: 'd'
+        },
+        player2: {
+            up: 'i',
+            down: 'k',
+            left: 'j',
+            right: 'l'
+        }
+    };
+
+    function moveFish() {
+        // Calculate current speeds based on mass
+        let fish1Speed = calculateSpeed(fish1.mass);
+        let fish2Speed = calculateSpeed(fish2.mass);
+
+        // Store previous velocities for direction change detection
+        let prevVx1 = fish1.vx;
+        let prevVx2 = fish2.vx;
+
+        // Player 1 controls: WASD
+        fish1.vx = 0;
+        fish1.vy = 0;
+        if (keysPressed[CONTROLS.player1.left]) fish1.vx = -fish1Speed;
+        if (keysPressed[CONTROLS.player1.right]) fish1.vx = fish1Speed;
+        if (keysPressed[CONTROLS.player1.up]) fish1.vy = -fish1Speed;
+        if (keysPressed[CONTROLS.player1.down]) fish1.vy = fish1Speed;
+
+        // Player 2 controls: Arrows
+        fish2.vx = 0;
+        fish2.vy = 0;
+        if (keysPressed[CONTROLS.player2.left]) fish2.vx = -fish2Speed;
+        if (keysPressed[CONTROLS.player2.right]) fish2.vx = fish2Speed;
+        if (keysPressed[CONTROLS.player2.up]) fish2.vy = -fish2Speed;
+        if (keysPressed[CONTROLS.player2.down]) fish2.vy = fish2Speed;
+
+        // Update positions
+        fish1.x += fish1.vx;
+        fish1.y += fish1.vy;
+        fish2.x += fish2.vx;
+        fish2.y += fish2.vy;
+
+        // Handle direction changes
+        if (fish1.vx < 0 && !fish1.facingLeft) {
+            fish1.facingLeft = true;
+            fish1El.classList.add('facing-left');
+        } else if (fish1.vx > 0 && fish1.facingLeft) {
+            fish1.facingLeft = false;
+            fish1El.classList.remove('facing-left');
+        }
+
+        if (fish2.vx < 0 && !fish2.facingLeft) {
+            fish2.facingLeft = true;
+            fish2El.classList.add('facing-left');
+        } else if (fish2.vx > 0 && fish2.facingLeft) {
+            fish2.facingLeft = false;
+            fish2El.classList.remove('facing-left');
+        }
+
+        // Boundary checks
+        if (fish1.x < 0) fish1.x = 0;
+        if (fish1.x > gameParams.boardSize - 50) fish1.x = gameParams.boardSize - 50;
+        if (fish1.y < 0) fish1.y = 0;
+        if (fish1.y > gameParams.boardSize - 30) fish1.y = gameParams.boardSize - 30;
+
+        if (fish2.x < 0) fish2.x = 0;
+        if (fish2.x > gameParams.boardSize - 50) fish2.x = gameParams.boardSize - 50;
+        if (fish2.y < 0) fish2.y = 0;
+        if (fish2.y > gameParams.boardSize - 30) fish2.y = gameParams.boardSize - 30;
+
+        // Update fish elements position
+        fish1El.style.left = fish1.x + "px";
+        fish1El.style.top = fish1.y + "px";
+        fish2El.style.left = fish2.x + "px";
+        fish2El.style.top = fish2.y + "px";
+    }
+
+    function spawnFood() {
+        if (remainingFood <= 0) return;
+        remainingFood--;
+
+        // Food mass is based on level (1-5)
+        let massLevel = Math.floor(Math.random() * 5) + 1;
+        let mass = massLevel * 10;
+
+        let baseRadius = 3;
+        let radius = baseRadius + (massLevel - 1) * 2;
+
+        let color = massLevelColor(massLevel);
+        let angleDeg = Math.random() * 90 - 45;
+        let angleRad = angleDeg * Math.PI/180;
+        let speed = Math.random() * 50 + 10;
+        let startX = Math.random() * gameParams.boardSize;
+
+        let food = {
+            x: startX,
+            y: 0,
+            vx: speed * Math.sin(angleRad),
+            vy: speed * Math.cos(angleRad),
+            mass: mass,
+            radius: radius,
+            color: color
+        };
+
+        let foodEl = document.createElement("div");
+        foodEl.className = "food";
+        foodEl.style.width = (radius * 2) + "px";
+        foodEl.style.height = (radius * 2) + "px";
+        foodEl.style.background = color;
+        foodEl.style.left = food.x + "px";
+        foodEl.style.top = food.y + "px";
+
+        document.getElementById("fishTank").appendChild(foodEl);
+        food.el = foodEl;
+        foods.push(food);
+    }
+
+    function massLevelColor(level) {
+        let shade = Math.round(255 - level * 40);
+        return `rgb(${shade},${shade},${shade})`;
+    }
+
+    function updateFood() {
+        for (let i = 0; i < foods.length; i++) {
+            let f = foods[i];
+            f.x += f.vx * 0.1;
+            f.y += f.vy * 0.1;
+
+            if (f.x < 0) {
+                f.x = 0;
+                f.vx = -f.vx;
+            }
+            if (f.x > gameParams.boardSize - f.radius * 2) {
+                f.x = gameParams.boardSize - f.radius * 2;
+                f.vx = -f.vx;
+            }
+
+            f.el.style.left = f.x + "px";
+            f.el.style.top = f.y + "px";
+
+            if (f.y > gameParams.boardSize - f.radius * 2) {
+                document.getElementById("fishTank").removeChild(f.el);
+                foods.splice(i, 1);
+                i--;
+            }
+        }
+
+        // Spawn food periodically
+        if (timeStep % 35 === 0 && remainingFood > 0) {
+            spawnFood();
+        }
+    }
+
+    function checkCollisions() {
+        const FISH_WIDTH = 50;
+        const FISH_HEIGHT = 30;
+
+        let fish1Center = {
+            x: fish1.x + (FISH_WIDTH/2),
+            y: fish1.y + (FISH_HEIGHT/2)
+        };
+        let fish2Center = {
+            x: fish2.x + (FISH_WIDTH/2),
+            y: fish2.y + (FISH_HEIGHT/2)
+        };
+
+        for (let i = foods.length - 1; i >= 0; i--) {
+            let f = foods[i];
+            let foodCenter = {
+                x: f.x + f.radius,
+                y: f.y + f.radius
+            };
+
+            let dist1 = distance(foodCenter.x, foodCenter.y, fish1Center.x, fish1Center.y);
+            let dist2 = distance(foodCenter.x, foodCenter.y, fish2Center.x, fish2Center.y);
+
+            const COLLISION_DISTANCE = 15;
+
+            let fish1Collision = dist1 <= COLLISION_DISTANCE;
+            let fish2Collision = dist2 <= COLLISION_DISTANCE;
+
+            if (fish1Collision && fish2Collision) {
+                // Split mass between fish if both collide
+                addEatEffect(fish1El);
+                addEatEffect(fish2El);
+                let halfMass = Math.floor(f.mass / 2);
+                fish1.mass += halfMass;
+                fish2.mass += (f.mass - halfMass);
+                document.getElementById("fishTank").removeChild(f.el);
+                foods.splice(i, 1);
+                updateUI();
+            } else if (fish1Collision) {
+                addEatEffect(fish1El);
+                fish1.mass += f.mass;
+                document.getElementById("fishTank").removeChild(f.el);
+                foods.splice(i, 1);
+                updateUI();
+            } else if (fish2Collision) {
+                addEatEffect(fish2El);
+                fish2.mass += f.mass;
+                document.getElementById("fishTank").removeChild(f.el);
+                foods.splice(i, 1);
+                updateUI();
+            }
+        }
+    }
+
+    function distance(x1, y1, x2, y2) {
+        let dx = x1 - x2;
+        let dy = y1 - y2;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function updateMass() {
+        if (timeStep > 0 && timeStep % gameParams.massLossRate === 0) {
+            if (fish1.mass > gameParams.initialMass) {
+                fish1.mass = Math.max(gameParams.initialMass, fish1.mass - gameParams.massLossAmount);
+            }
+            if (fish2.mass > gameParams.initialMass) {
+                fish2.mass = Math.max(gameParams.initialMass, fish2.mass - gameParams.massLossAmount);
+            }
+            updateUI();
+        }
+    }
+
+    function updateFishAppearance() {
+        let size1 = calculateFishSize(fish1.mass);
+        let size2 = calculateFishSize(fish2.mass);
+
+        fish1El.style.width = size1 + "px";
+        fish1El.style.height = (size1 * 0.6) + "px";
+        fish2El.style.width = size2 + "px";
+        fish2El.style.height = (size2 * 0.6) + "px";
+
+        // Update SVG color based on mass
+        let maxMass = gameParams.initialMass * 3;
+        let color1 = interpolateColor(fish1.baseColor, fish1.mass, gameParams.initialMass, maxMass);
+        let color2 = interpolateColor(fish2.baseColor, fish2.mass, gameParams.initialMass, maxMass);
+
+        fish1El.querySelector('path').setAttribute('fill', color1);
+        fish2El.querySelector('path').setAttribute('fill', color2);
+
+        // Update mass display
+        // First remove any existing mass display
+        let massDisplay1 = fish1El.querySelector('.mass-display');
+        let massDisplay2 = fish2El.querySelector('.mass-display');
+        if (massDisplay1) massDisplay1.remove();
+        if (massDisplay2) massDisplay2.remove();
+
+        // Create new mass displays
+        let mass1 = document.createElement('div');
+        mass1.className = 'mass-display';
+        mass1.innerText = Math.round(fish1.mass);
+        fish1El.appendChild(mass1);
+
+        let mass2 = document.createElement('div');
+        mass2.className = 'mass-display';
+        mass2.innerText = Math.round(fish2.mass);
+        fish2El.appendChild(mass2);
+    }
+
+    function interpolateColor(baseHex, mass, minMass, maxMass) {
+        let baseRGB = hexToRgb(baseHex);
+        let t = Math.min((mass - minMass) / (maxMass - minMass), 1);
+        let white = {r: 255, g: 255, b: 255};
+        return `rgb(${Math.round(baseRGB.r + (white.r - baseRGB.r) * t)},
+                    ${Math.round(baseRGB.g + (white.g - baseRGB.g) * t)},
+                    ${Math.round(baseRGB.b + (white.b - baseRGB.b) * t)})`;
+    }
+
+    function hexToRgb(hex) {
+        let c = hex.replace('#','');
+        if (c.length === 3) {
+            c = c[0] + c[0] + c[1] + c[1] + c[2] + c[2];
+        }
+        let r = parseInt(c.substring(0,2), 16);
+        let g = parseInt(c.substring(2,4), 16);
+        let b = parseInt(c.substring(4,6), 16);
+        return {r, g, b};
+    }
+
+    function calculateFishSize(mass) {
+        const minSize = 65;
+        const maxSize = 215;
+        const minMass = gameParams.initialMass;
+        const growthFactor = 0.3;
+
+        const size = minSize + (maxSize - minSize) *
+            (1 - 1 / (1 + growthFactor * Math.log(mass / minMass)));
+
+        return Math.max(minSize, Math.min(maxSize, size));
+    }
+
+    function addEatEffect(fishEl) {
+        fishEl.classList.add('eating', 'flashing');
+
+        setTimeout(() => {
+            fishEl.classList.remove('eating', 'flashing');
+        }, 300);
+    }
+
+    function checkGameOver() {
+        if (remainingFood === 0 && foods.length === 0 && !gameOver) {
+            gameOver = true;
+            let winner = "";
+            if (fish1.mass > fish2.mass) winner = fish1.name + " Wins!";
+            else if (fish2.mass > fish1.mass) winner = fish2.name + " Wins!";
+            else winner = "It's a tie!";
+
+            let overlay = document.createElement("div");
+            overlay.id = "gameOverOverlay";
+            overlay.innerHTML = "Game Over<br>" + winner;
+            document.getElementById("gamePage").appendChild(overlay);
+        }
+    }
+
+    function gameLoop() {
+        if (gameOver) return;
+
+        timeStep++;
+        moveFish();
+        updateFood();
+        checkCollisions();
+        updateMass();
+        updateUI();
+        updateFishAppearance();
+        checkGameOver();
+
+        requestAnimationFrame(gameLoop);
+    }
+
+</script>
+</body>
+</html>

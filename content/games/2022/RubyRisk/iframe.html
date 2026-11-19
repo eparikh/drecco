@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <head>
+        <!-- <base href="http://cims.nyu.edu/drecco2016/"> -->
+        <script src="js/jquery-2.2.4.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.11/p5.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.11/addons/p5.dom.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.11/addons/p5.sound.min.js"></script>
+        <script src="./script.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.css"/>
+        <link rel="stylesheet" type="text/css" href="css/game.css"/>
+    </head>
+
+  <title>Number guessing game</title>
+</head>
+
+<body>
+  <div class="container-fluid"> 
+            <h1 class="page-header game-title">Ruby Risk</h1> 
+
+            <div class="information-container col-sm-3">
+                <div class="information col-sm-10">
+                    <h2 class="information-header"> Game information </h2>
+                    <div class="info-form">
+                        <label for="player-1"> Player 1 Name </label>
+                        <input type="text" class="form-control info-input" id="player-1">
+                    </div>
+
+                     <div class="info-form">
+                        <label for="player-2"> Player 2 Name </label>
+                        <input type="text" class="form-control info-input" id="player-2">
+                    </div>
+
+                     <div class="info-form">
+                        <label for="number-of-boxes"> Number of Boxes (n) </label>
+                        <input type="text" class="form-control info-input" id="number-of-boxes" value="3">
+                    </div>
+
+                     <div class="info-form">
+                        <label for="number-of-rubies"> Number of Rubies (m) </label>
+                        <input type="text" class="form-control info-input" id="number-of-rubies" value="29">
+                    </div>
+
+                     <div class="col-sm-12 alert alert-danger alert-dismissable" id="error-container">
+                        <a href="#" class="close" aria-label="close">&times;</a>
+                        <p id="error-message"> </p>
+                    </div>
+                    <div class="btn-container col-sm-12">
+                        <button type="button" class="start-game btn btn-primary" onclick="startGame();">Start</button>
+                    </div>
+
+                   
+                </div>
+            </div>
+            <div class="game col-sm-9" id='game-container'>
+            <div class="game-box"></div>
+               <div class="form">
+                <label for="guessField">Enter a guess: </label>
+                <input type="number" min="1" max="100" required id="guessField" class="guessField">
+                <!-- <label for="guessField2">Enter a box number: </label>
+                <input type="number" min="1" max="100" required id="guessField2" class="guessField2">
+                <br> -->
+                <button type="submit" class="btn btn-primary submit-move" onclick="checkGuess()">Submit Guess</button>
+            </div>
+
+            <div class="rubies">
+                <div id="p1_rubies"></div>
+                <div id="p2_rubies"></div>
+                <br><br><br><br><br>
+                <br><br><br><br><br>
+
+
+            </div>
+            <div class="resultParas">
+                <p class="player"></p>
+                <p class="p1guesses"></p>
+                <p class="p1guesses2"></p>
+                <p class="p2guesses"></p>
+                <p class="p2guesses2"></p>
+                <p class="p1score"></p>
+                <p class="p2score"></p>
+                <p class="lastResult"></p>
+                <p style="font-size: 50px;" class="lowOrHi"></p>
+                <p class="ruby"></p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

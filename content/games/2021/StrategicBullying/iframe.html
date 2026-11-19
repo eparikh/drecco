@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    
+        <script src="iframe_files/jquery-2.2.4.min.js"></script>
+        <script src="iframe_files/p5.min.js"></script>
+        <script src="iframe_files/p5.dom.min.js"></script>
+        <script src="iframe_files/p5.sound.min.js"></script>
+        <script src="iframe_files/script.js"></script>
+        <link rel="stylesheet" type="text/css" href="iframe_files/bootstrap.css">
+        <link rel="stylesheet" type="text/css" href="iframe_files/game.css">
+    </head>
+    <body>
+        <div class="container-fluid"> 
+            <h1 class="page-header game-title" id="Title"> Strategic Bullying </h1> 
+            <div class="information-container col-sm-3">
+                <div class="information col-sm-10">
+                    <h2 class="information-header" id="info-header"> Game information </h2>
+                    <div class="info-form">
+                        <label for="player-1" id="p1"> Player 1 Name </label>
+                        <input type="text" class="form-control info-input" id="p1-Name" value="P1">
+                    </div>
+
+                     <div class="info-form">
+                        <label for="player-2" id="p2"> Player 2 Name </label>
+                        <input type="text" class="form-control info-input" id="p2-Name" value="P2">
+                    </div>
+
+                     <div class="info-form">
+                        <label for="L-Road" id="L"> Length of Road </label>
+                        <input type="text" class="form-control info-input" id="L-Road" value="30">
+                    </div>
+
+                     <div class="info-form">
+                        <label for="Ep" id="EP"> Expectation of Power </label>
+                        <input type="text" class="form-control info-input" id="Ep" value="100">
+                    </div>
+
+                     <div class="info-form">
+                        <label for="sd-p" id="SDP" style="display: none;"> Standard Deviation of Power </label>
+                        <input type="text" class="form-control info-input" id="sd-p" value="30" style="display: none;">
+                    </div>
+                    
+                    <div class="info-form">
+                        <label for="Em" id="EM"> Expectation of Money </label>
+                        <input type="text" class="form-control info-input" id="Em" value="100">
+                    </div>
+
+                     <div class="info-form">
+                        <label for="sd-m" id="SDM" style="display: none;"> Standard Deviation of Money </label>
+                        <input type="text" class="form-control info-input" id="sd-m" value="30" style="display: none;">
+                    </div>
+
+                     <div class="col-sm-12 alert alert-danger alert-dismissable" id="error-container">
+                        <a href="#" class="close" aria-label="close">×</a>
+                        <p id="error-message"> </p>
+                    </div>
+                    <div class="btn-container col-sm-12">
+                        <button type="button" id="but" class="start-game btn btn-primary" onclick="startGame();">New Game</button>
+                    </div>
+                    <div class="btn-container col-sm-12">
+                        <button type="button" id="rule" class="start-game btn btn-primary" onclick="Rule();">Game Rule</button>
+                    </div>
+                </div>
+            </div>
+            <div class="game col-sm-8" id="game-container" style="float: left;">
+        </div>
+    
+
+    <script>
+        $('.close').on('click', function() {
+            $(this).parent().hide();
+            console.log('worked');
+        });
+
+    </script>
+
+</body></html>

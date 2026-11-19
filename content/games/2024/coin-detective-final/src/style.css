@@ -1,0 +1,214 @@
+:root{
+    --coin-color: #FFD700;
+    --coin-border: #B8860B;
+    --cell-border: #ccc;
+    --cell-correct: #20ff20;
+    --cell-wrong: #ff2020;
+    --reset-btn: #3e81ed;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.game-container {
+    text-align: center;
+}
+
+.coins-row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.coin {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #FFD700;
+    border: 2px solid #B8860B;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 20px;
+    transform-style: preserve-3d;
+    transition: transform 0.4s ease-in-out;
+}
+
+.coin.flip {
+    transform: rotateX(360deg);
+}
+
+.grid {
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    grid-template-columns: repeat(6, 60px);
+    gap: 10px;
+    margin-bottom: 30px;
+    max-height: 360px;
+    overflow: auto;
+}
+
+.cell {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.cell.correct{
+    background-color: var(--cell-correct);
+}
+
+.cell.wrong{
+    background-color: var(--cell-wrong);
+}
+
+.controls {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.make-guess-btn{
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+.guess-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    display: none;
+}
+
+.reset-btn{
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: var(--reset-btn);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: none;
+}
+
+.stats {
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 24px;
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+.biases {
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    grid-template-columns: repeat(5, 1fr);
+    font-weight: bold;
+    gap: 24px;
+    margin-top: 5px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.message {
+    margin-top: 20px;
+    justify-content: center;
+    box-sizing: border-box;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.win-message {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.lose-message {
+    color: #f44336;
+    font-weight: bold;
+}
+
+.neutral-message{
+    color: #010101
+}
+
+.overlay {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+
+.overlay-content {
+    background-color: white;
+    width: 30%;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.overlay-content input,
+.overlay-content select {
+    display: block;
+    margin: 10px auto;
+}
+
+#guessesValue,
+#coinsValue{
+    font-weight: bold
+}
+
+.animated{
+    animation: flip 0.5s ease;
+}
+
+@keyframes flip{
+    0% {
+        transform: scaleY(1);
+    }
+    50% {
+        transform: scaleY(0);
+    }
+    100% {
+        transform: scaleY(1);
+    }
+}

@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hilltops Game</title>
+    <style>
+        /* --- Global Settings --- */
+        /* We use variables here so we can easily change colors or sizes later */
+        :root {
+            --cell-size: 60px;          /* Width/Height of one tile */
+            --debug-cell-size: 30px;    /* Size of the small debug grids at the bottom */
+            --bg-color: #f8fafc;
+            --primary: #3b82f6;         /* Blue */
+            --primary-dark: #1d4ed8;    /* Dark Blue */
+            --success: #10b981;         /* Green */
+            --text-main: #334155;
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+            overflow-y: auto;
+
+            /* Global Interface: Disable selection to prioritize drag-and-drop interactions */
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        h1 { margin-bottom: 1rem; color: #1e293b; }
+
+        /* --- Controls & Layout --- */
+        .controls-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow-card);
+            width: 100%;
+            max-width: 850px;
+            margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
+            
+            /* Layout: Side-by-Side Flexbox */
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        /* Left column: Textarea */
+        .config-left {
+            flex: 1; 
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .config-left label {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            font-family: 'Menlo', 'Monaco', monospace; /* Monospace font helps numbers align nicely */
+            padding: 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            resize: vertical;
+            box-sizing: border-box;
+            background-color: #fcfcfc;
+            font-size: 0.95rem;
+            line-height: 1.5;
+
+            /* Input Override: Ensure text remains selectable and cursor is visible */
+            -webkit-user-select: text;
+            user-select: text;
+            cursor: text;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #fff;
+        }
+
+        /* Right column: Controls (Dropdown + Button) */
+        .config-right {
+             width: 260px;
+             flex-shrink: 0;
+             display: flex;
+             flex-direction: column;
+             justify-content: flex-end;
+             gap: 0.8rem;
+             padding-top: 1.8rem; /* Align visual top with text area */
+        }
+
+        .preset-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+
+        /* --- CUSTOM DROPDOWN STYLING (FIXES FLOATING BUG) --- */
+        .custom-dropdown {
+            position: relative;
+            width: 100%;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .dropdown-trigger {
+            padding: 0.6rem 0.8rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .dropdown-trigger:hover {
+            border-color: #94a3b8; 
+            background-color: #f1f5f9;
+        }
+
+        .dropdown-trigger.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        .dropdown-arrow {
+            font-size: 0.7em;
+            color: #64748b;
+            transition: transform 0.2s;
+        }
+        .dropdown-trigger.active .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* The Dropdown Menu List */
+        .dropdown-menu {
+            position: absolute;
+            top: 105%; /* Just below the trigger */
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 1000; /* Sit on top of everything */
+            display: none; /* Hidden by default */
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        .dropdown-menu.show { display: flex; }
+
+        .dropdown-item {
+            padding: 0.6rem 0.8rem;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        .dropdown-item:hover {
+            background-color: #eff6ff;
+            color: var(--primary);
+        }
+
+        /* --- Buttons --- */
+        .action-bar {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        button {
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        /* Config Button specific styling */
+        .config-right button.btn-primary {
+            width: 100%;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-dark); transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); }
+
+        .btn-undo { background-color: #64748b; color: white; } /* Grey for Undo */
+        .btn-undo:hover { background-color: #475569; }
+
+        .btn-viz { background-color: #8b5cf6; color: white; } /* Purple button for 3D */
+        .btn-viz:hover { background-color: #7c3aed; }
+        .btn-viz.active { background-color: #6d28d9; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+
+        .btn-check { background-color: var(--success); color: white; } /* Green button for Check */
+        .btn-check:hover { background-color: #059669; }
+
+        /* --- Score Dashboard --- */
+        .stats-bar {
+            display: flex;
+            gap: 2rem;
+            background: white;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            box-shadow: var(--shadow-card);
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- Result Box (Success/Fail Messages) --- */
+        .result-box {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            display: none; /* Hidden until user clicks 'Check configuration' */
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            box-shadow: var(--shadow-card);
+        }
+        .result-success { border: 2px solid #10b981; background-color: #f0fdf4; }
+        .result-fail { border: 2px solid #ef4444; background-color: #fef2f2; }
+
+        .result-title { font-size: 1.2rem; margin-bottom: 0.5rem; display: block; }
+
+        /* --- Debug Grids (The small grids at the bottom) --- */
+        .debug-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1.5rem;
+        }
+
+        .debug-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .debug-section h4 { margin: 0 0 10px 0; font-size: 0.9rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .debug-grid { display: grid; gap: 2px; }
+        .debug-cell {
+            width: var(--debug-cell-size);
+            height: var(--debug-cell-size);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-radius: 4px;
+            color: white;
+        }
+
+        /* Debug Colors */
+        .r-yes { background-color: #10b981; } /* Green: Reaches the bottom */
+        .r-no { background-color: #ef4444; }  /* Red: Trapped water */
+        .d-val { background-color: #64748b; } /* Grey: Valid distance */
+        .d-inf { background-color: #ef4444; } /* Red: Unreachable */
+
+        /* --- 2D Game Area --- */
+        .game-area-2d {
+            padding: 20px;
+            background: #e2e8f0;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        #grid2D { display: grid; gap: 4px; }
+
+        .cell {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            background: white;
+            border: 1px solid #94a3b8;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #475569;
+            cursor: grab; /* Shows the "hand" icon so user knows it's draggable */
+            user-select: none;
+            transition: transform 0.2s, background-color 0.2s;
+            box-shadow: 0 2px 0 #cbd5e1;
+        }
+
+        .cell:active { cursor: grabbing; transform: scale(0.95); }
+        .cell.dragging { opacity: 0.4; border-color: var(--primary); }
+        .cell.min-cell { background-color: #d1fae5; border-color: #34d399; color: #065f46; } /* Highlight the lowest number */
+
+        /* --- History Log --- */
+        .history-panel {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            box-shadow: var(--shadow-card);
+        }
+        .history-panel h3 { margin: 0 0 10px 0; font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+
+        #historyList {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .history-item {
+            padding: 6px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* --- 3D Visualization Embedded Styles --- */
+        
+        .view-3d-panel {
+            display: none; /* Hidden by default */
+            width: 100%;
+            max-width: 850px;
+            height: 450px; /* Fixed height for the inline view */
+            background-color: #0f172a; /* Dark background for better 3D contrast */
+            border-radius: 12px;
+            margin-top: 20px;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            overflow: hidden; /* Important so 3D elements don't spill out */
+        }
+        
+        .view-3d-panel.active {
+            display: block;
+        }
+
+        .view-instructions {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.6);
+            font-size: 0.85rem;
+            pointer-events: none;
+            background: rgba(0,0,0,0.4);
+            padding: 5px 12px;
+            border-radius: 20px;
+            z-index: 10;
+        }
+
+        /* This container holds the 3D scene */
+        .scene-container {
+            width: 100%;
+            height: 100%;
+            perspective: 1200px; /* Simulates depth/camera distance */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: move; /* Indicates you can drag to rotate */
+
+            /* Optimized for interaction; prevents highlighting during rotation */
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .pivot-point {
+            position: relative;
+            transform-style: preserve-3d;
+            /* Optimized for smooth animation */
+            will-change: transform;
+        }
+
+        /* --- 3D Block Styles --- */
+        /* The "Pillar" is the base footprint on the floor */
+        .pillar {
+            position: absolute;
+            width: var(--cell-size);
+            height: var(--cell-size);
+            transform-style: preserve-3d;
+            background: rgba(0,0,0,0.1);
+
+            /* Prevent selecting pillar text during rotation */
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .wall {
+            position: absolute;
+            background-color: inherit;
+            pointer-events: none;
+        }
+
+        /* The Top Face (where the number is) */
+        .wall-cap {
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1.2rem; color: #1e293b;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: inherit;
+            filter: brightness(1.2);
+            transform: translateZ(var(--pillar-height)); /* Moves this face UP in 3D space */
+        }
+
+        /* These classes construct the sides of the 3D block.
+           We rotate divs 90 degrees to make them stand up like walls.
+        */
+        .wall-south {
+            left: 0; bottom: 0; width: 100%; height: var(--pillar-height);
+            transform-origin: bottom; transform: rotateX(-90deg); filter: brightness(0.7);
+        }
+        .wall-north {
+            left: 0; top: 0; width: 100%; height: var(--pillar-height);
+            transform-origin: top; transform: rotateX(90deg); filter: brightness(0.75);
+        }
+        .wall-east {
+            right: 0; top: 0; width: var(--pillar-height); height: 100%;
+            transform-origin: right; transform: rotateY(90deg); filter: brightness(0.9);
+        }
+        .wall-west {
+            left: 0; top: 0; width: var(--pillar-height); height: 100%;
+            transform-origin: left; transform: rotateY(-90deg); filter: brightness(0.95);
+        }
+
+        /* Responsive */
+        @media (max-width: 500px) {
+            .controls-container { flex-direction: column; }
+            .config-right { width: 100%; padding-top: 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Hilltops Challenge</h1>
+
+    <div class="controls-container">
+        <div class="config-left">
+            <label for="inputConfig">Initial Configuration:</label>
+            <textarea id="inputConfig" oninput="document.getElementById('dd-text').innerText = 'Select a preset...'">21 14 12
+10 15 19
+17 11 20
+13 16 18</textarea>
+        </div>
+
+        <div class="config-right">
+            <div>
+                <span class="preset-label">Example configurations:</span>
+                
+                <div class="custom-dropdown" id="dropdownContainer">
+                    <div class="dropdown-trigger" onclick="GameController.toggleDropdown()">
+                        <span id="dd-text">Select a configuration...</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <div class="dropdown-item" onclick="GameController.selectPreset('matrix-1', 'Matrix-1 (Default)')">Matrix-1 (Default)</div>
+                        <div class="dropdown-item" onclick="GameController.selectPreset('matrix-2', 'Matrix-2 (5x5)')">Matrix-2 (5x5)</div>
+                        <div class="dropdown-item" onclick="GameController.selectPreset('matrix-3', 'Matrix-3 (9x8)')">Matrix-3 (9x8)</div>
+                        <div class="dropdown-item" onclick="GameController.selectPreset('matrix-4', 'Matrix-4 (9x8)')">Matrix-4 (9x8)</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="GameController.initGame()">Load/Reset Configuration</button>
+        </div>
+    </div>
+
+    <div class="stats-bar">
+        <span id="swapDisplay">Swaps: 0</span>
+        <span id="distDisplay">Max Worst Distance: -</span>
+    </div>
+
+    <div class="game-area-2d">
+        <div id="grid2D"></div>
+    </div>
+
+    <div class="action-bar">
+        <button class="btn-undo" onclick="GameController.undo()">Undo</button>
+        <button id="btnViz" class="btn-viz" onclick="ViewController.toggle3D()">View in 3D</button>
+        <button class="btn-check" onclick="GameController.validate()">Check configuration</button>
+    </div>
+
+    <div id="resultBox" class="result-box">
+        <strong id="resultTitle" class="result-title"></strong>
+        <div id="resultBody"></div>
+
+        <div class="debug-container">
+            <div class="debug-section">
+                <h4>Reachability</h4>
+                <div id="gridReach" class="debug-grid"></div>
+            </div>
+            <div class="debug-section">
+                <h4>Worst Distance</h4>
+                <div id="gridDist" class="debug-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view3DPanel" class="view-3d-panel">
+        <div class="view-instructions">Drag to Rotate • Scroll to Zoom</div>
+        <div class="scene-container" id="sceneContainer">
+            <div class="pivot-point" id="pivotPoint"></div>
+        </div>
+    </div>
+
+    <div class="history-panel">
+        <h3>Swap History</h3>
+        <ul id="historyList">
+            <li style="color:#94a3b8; padding:5px;">No moves made yet.</li>
+        </ul>
+    </div>
+
+<script>
+
+/* New Constants for Presets */
+const PRESETS = {
+    "matrix-1": `21 14 12
+10 15 19
+17 11 20
+13 16 18`,
+    
+    "matrix-2": `23 26 20 22 32
+29 18 16 21 24
+19 13 31 25 34
+14 17 10 28 11
+12 15 27 30 33`,
+
+    "matrix-3": `67 71 76 17 56 54 69 55
+65 51 49 25 80 53 75 66
+62 73 32 68 57 59 74 30
+50 72 38 45 58 10 36 27
+64 37 20 31 44 41 39 78
+33 22 21 16 14 47 12 15
+79 40 24 19 13 61 11 42
+70 43 26 46 23 60 29 77
+48 52 63 81 34 18 28 35`,
+
+    "matrix-4": `75 58 43 45 33 35 55 54
+66 78 51 76 29 67 48 70
+71 81 61 79 44 30 77 11
+63 65 53 68 19 72 17 10
+64 41 62 52 12 16 18 28
+69 73 15 80 27 49 42 32
+60 25 39 13 14 31 36 59
+46 37 26 20 56 21 40 38
+50 57 47 24 23 22 74 34`
+};
+
+/**
+ * GameState
+ * This object holds all the data: the numbers in the grid, the number of swaps, etc.
+ * It also contains the logic to check if the game is won.
+ */
+const GameState = {
+    grid: [],    // The 2D array of numbers
+    rows: 0,
+    cols: 0,
+    swaps: 0,    // How many moves the user has made
+    history: [], // Keeps a list of moves (e.g., "Swap 21 with 14")
+    moveStack: [], // Tracks moves for the Undo feature
+
+    /**
+     * Reads the text box input and turns it into a code-usable 2D array.
+     */
+    loadFromInput(rawInput) {
+        this.grid = [];
+        this.swaps = 0;
+        this.history = [];
+        this.moveStack = [];
+
+        // Split text by new lines to get rows
+        const lines = rawInput.split('\n').filter(l => l.trim() !== '');
+        try {
+            lines.forEach(line => {
+                // Split each row by spaces to get the numbers
+                const rowVals = line.trim().split(/\s+/).map(Number);
+                if (rowVals.length > 0) this.grid.push(rowVals);
+            });
+
+            if (this.grid.length === 0) throw new Error("Empty input");
+            this.rows = this.grid.length;
+            this.cols = this.grid[0].length;
+
+            // Make sure every row has the same number of columns
+            if (!this.grid.every(r => r.length === this.cols)) {
+                alert("Error: Matrix must be rectangular (all rows must have the same number of items).");
+                return false;
+            }
+            return true;
+        } catch (e) {
+            alert("Invalid input format. Please look at the example.");
+            return false;
+        }
+    },
+
+    /**
+     * Updates the grid data when the user moves a tile.
+     */
+    swap(r1, c1, r2, c2) {
+        const val1 = this.grid[r1][c1];
+        const val2 = this.grid[r2][c2];
+
+        // Save move for Undo before swapping
+        this.moveStack.push({r1, c1, r2, c2});
+
+        // Perform the swap in memory
+        this.grid[r1][c1] = val2;
+        this.grid[r2][c2] = val1;
+
+        this.swaps++;
+        this.history.push(`Swap <strong>${val1}</strong> <-> <strong>${val2}</strong>`);
+    },
+
+    /**
+    * Reverts the last move made by the user
+    */
+    undoLastMove() {
+        if (this.moveStack.length === 0) return false;
+
+        const move = this.moveStack.pop();
+
+        // Reverse the swap (swapping same coordinates restores original state)
+        const val1 = this.grid[move.r1][move.c1];
+        const val2 = this.grid[move.r2][move.c2];
+        this.grid[move.r1][move.c1] = val2;
+        this.grid[move.r2][move.c2] = val1;
+        this.swaps--;
+        this.history.pop(); // Remove log
+        return true;
+    },
+
+    /**
+     * THE MAIN ALGORITHM
+     * Checks if water flows from every cell down to the minimum cell.
+     * * How it works:
+     * 1. Find the lowest number (the drain).
+     * 2. Sort all hills from lowest to highest.
+     * 3. Go through the sorted hills. If a hill has a neighbor that is LOWER
+     * and that neighbor is already "connected" to the drain, then this hill
+     * is also connected.
+     */
+    checkHilltopPerfect() {
+        const N = this.rows * this.cols;
+        const idx = (r, c) => r * this.cols + c; // Helper to get 1D index
+        const isValid = (r, c) => r >= 0 && r < this.rows && c >= 0 && c < this.cols; // Helper to check bounds
+
+        // Step 1: Find the Drain (Global Minimum)
+        let minVal = Infinity, minRow = -1, minCol = -1;
+        for(let r=0; r<this.rows; r++) {
+            for(let c=0; c<this.cols; c++) {
+                if(this.grid[r][c] < minVal) {
+                    minVal = this.grid[r][c];
+                    minRow = r;
+                    minCol = c;
+                }
+            }
+        }
+
+        // Step 2: Sort all cells by height (Topological Sort)
+        let nodes = [];
+        for(let r=0; r<this.rows; r++) {
+            for(let c=0; c<this.cols; c++) {
+                nodes.push({ r, c, h: this.grid[r][c], id: idx(r,c) });
+            }
+        }
+        nodes.sort((a, b) => a.h - b.h);
+
+        // Step 3: Check Connections (Dynamic Programming)
+        let reachable = new Array(N).fill(false);
+        let worstDistance = new Array(N).fill(-1);
+
+        const startIdx = idx(minRow, minCol);
+        reachable[startIdx] = true; // The drain is always reachable
+        worstDistance[startIdx] = 0;
+
+        // Directions: Up, Down, Left, Right
+        const dr = [-1, 1, 0, 0];
+        const dc = [0, 0, -1, 1];
+
+        // Process cells from lowest to highest
+        for(let node of nodes) {
+            if(node.r === minRow && node.c === minCol) continue;
+
+            // Check neighbors
+            for(let d=0; d<4; d++) {
+                let nr = node.r + dr[d];
+                let nc = node.c + dc[d];
+                if(!isValid(nr, nc)) continue;
+
+                let nIdx = idx(nr, nc);
+
+                // CRITICAL CHECK:
+                // If the neighbor connects to the drain (reachable[nIdx] is true)
+                // AND the neighbor is physically lower than us (grid < node.h)
+                // THEN water can flow from us -> neighbor -> drain.
+                if(reachable[nIdx] && this.grid[nr][nc] < node.h) {
+                    reachable[node.id] = true;
+                    // We calculate worst distance: max distance of neighbor + 1
+                    worstDistance[node.id] = Math.max(worstDistance[node.id], worstDistance[nIdx] + 1);
+                }
+            }
+        }
+
+        // Step 4: Final verification
+        // If any cell is NOT reachable, the configuration fails.
+        let allReachable = true;
+        let maxDist = 0;
+        for(let i=0; i<N; i++) {
+            if(!reachable[i]) {
+                allReachable = false;
+                break;
+            }
+            maxDist = Math.max(maxDist, worstDistance[i]);
+        }
+
+        return {
+            success: allReachable,
+            maxDistance: maxDist,
+            reachableMap: reachable,
+            distanceMap: worstDistance
+        };
+    }
+};
+
+/**
+ * GameController
+ * Connects the logic (GameState) to the screen (HTML/DOM).
+ * Handles clicking, dragging, and updating the view.
+ */
+const GameController = {
+    dragSrc: null, // Remembers which tile we started dragging
+
+    initGame() {
+        const input = document.getElementById('inputConfig').value;
+        if (GameState.loadFromInput(input)) {
+            this.render2D();
+            this.updateStats();
+            this.renderHistory();
+            document.getElementById('resultBox').style.display = 'none';
+
+            // NEW: If 3D view is active, reload it
+            if(ViewController.isVisible) {
+                ViewController.render3D();
+            }
+        }
+    },
+
+    /* --- Dropdown logic --- */
+    toggleDropdown() {
+        const menu = document.getElementById('dropdownMenu');
+        const trigger = document.querySelector('.dropdown-trigger');
+        menu.classList.toggle('show');
+        trigger.classList.toggle('active');
+    },
+
+    selectPreset(key, displayText) {
+        if (PRESETS[key]) {
+            document.getElementById('inputConfig').value = PRESETS[key];
+            document.getElementById('dd-text').innerText = displayText;
+            this.toggleDropdown(); // Close menu
+        }
+    },
+
+    updateStats() {
+        document.getElementById('swapDisplay').innerText = `Swaps: ${GameState.swaps}`;
+        document.getElementById('distDisplay').innerText = `Max Worst Distance: -`;
+    },
+
+    renderHistory() {
+        const list = document.getElementById('historyList');
+        // Clear list if empty
+        if (GameState.history.length === 0) {
+            list.innerHTML = '<li style="color:#94a3b8; padding:5px;">No moves made yet.</li>';
+            return;
+        }
+        list.innerHTML = '';
+        // Add each move to the list
+        GameState.history.forEach((entry, i) => {
+            const li = document.createElement('li');
+            li.className = 'history-item';
+            li.innerHTML = `<span>#${i+1}</span> <span>${entry}</span>`;
+            list.appendChild(li);
+        });
+        // Scroll to the bottom of the list
+        list.scrollTop = list.scrollHeight;
+    },
+
+    // Draws the grid on the screen
+    render2D() {
+        const container = document.getElementById('grid2D');
+        container.innerHTML = '';
+        // Set CSS grid rows/cols
+        container.style.gridTemplateColumns = `repeat(${GameState.cols}, var(--cell-size))`;
+        container.style.gridTemplateRows = `repeat(${GameState.rows}, var(--cell-size))`;
+
+        // Find min value to highlight it green
+        let minVal = Infinity;
+        GameState.grid.flat().forEach(v => minVal = Math.min(minVal, v));
+
+        for(let r=0; r<GameState.rows; r++) {
+            for(let c=0; c<GameState.cols; c++) {
+                const val = GameState.grid[r][c];
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.draggable = true; // Allows dragging
+                cell.innerText = val;
+                cell.dataset.r = r;
+                cell.dataset.c = c;
+
+                if (val === minVal) cell.classList.add('min-cell');
+                this.bindDragEvents(cell);
+                container.appendChild(cell);
+            }
+        }
+    },
+
+    // Sets up the "Drag and Drop" functionality
+    bindDragEvents(cell) {
+        cell.addEventListener('dragstart', (e) => {
+            this.dragSrc = cell;
+            cell.style.opacity = '0.4'; // Make it semi-transparent when dragging
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', cell.innerHTML);
+        });
+        cell.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+        cell.addEventListener('dragenter', () => cell.classList.add('dragging'));
+        cell.addEventListener('dragleave', () => cell.classList.remove('dragging'));
+
+        cell.addEventListener('dragend', () => {
+            cell.style.opacity = '1';
+            document.querySelectorAll('.cell').forEach(c => c.classList.remove('dragging'));
+        });
+
+        // When dropped
+        cell.addEventListener('drop', (e) => {
+            e.stopPropagation();
+            // Only swap if dropped on a different cell
+            if (this.dragSrc !== cell) {
+                const r1 = parseInt(this.dragSrc.dataset.r);
+                const c1 = parseInt(this.dragSrc.dataset.c);
+                const r2 = parseInt(cell.dataset.r);
+                const c2 = parseInt(cell.dataset.c);
+
+                GameState.swap(r1, c1, r2, c2);
+                this.render2D();
+                this.updateStats();
+                this.renderHistory();
+                document.getElementById('resultBox').style.display = 'none'; // Hide old results
+
+                // NEW: Real-time update for 3D view
+                if(ViewController.isVisible) {
+                    ViewController.render3D();
+                }
+            }
+            return false;
+        });
+    },
+
+    // Handles the Undo button click
+    undo() {
+        if (GameState.undoLastMove()) {
+            this.render2D();
+            this.updateStats();
+            this.renderHistory();
+            document.getElementById('resultBox').style.display = 'none';
+
+            // NEW: Real-time update for 3D view
+            if(ViewController.isVisible) {
+                ViewController.render3D();
+            }
+        }
+    },
+
+    // Called when user clicks "Check configuration"
+    validate() {
+        const result = GameState.checkHilltopPerfect();
+        const box = document.getElementById('resultBox');
+        const title = document.getElementById('resultTitle');
+        const body = document.getElementById('resultBody');
+
+        box.style.display = 'block';
+
+        if (result.success) {
+            box.className = 'result-box result-success';
+            title.innerText = "Hilltop Perfect!";
+            title.style.color = "#065f46";
+            body.innerHTML = `Score: (${GameState.swaps} swaps, ${result.maxDistance} max distance)`;
+            document.getElementById('distDisplay').innerText = `Max Worst Distance: ${result.maxDistance}`;
+        } else {
+            box.className = 'result-box result-fail';
+            title.innerText = "Not Hilltop Perfect";
+            title.style.color = "#991b1b";
+            body.innerHTML = `Water is trapped. Check the small grids below to see where.`;
+            document.getElementById('distDisplay').innerText = `Max Worst Distance: -`;
+        }
+
+        this.renderDebugGrids(result);
+    },
+
+    // Draws the small red/green grids to help users debug
+    renderDebugGrids(result) {
+        // 1. Reachability Grid (Can water reach the bottom?)
+        const gridReach = document.getElementById('gridReach');
+        gridReach.innerHTML = '';
+        gridReach.style.gridTemplateColumns = `repeat(${GameState.cols}, var(--debug-cell-size))`;
+
+        result.reachableMap.forEach(isReachable => {
+            const cell = document.createElement('div');
+            cell.className = `debug-cell ${isReachable ? 'r-yes' : 'r-no'}`;
+            cell.innerText = isReachable ? '✓' : 'X';
+            gridReach.appendChild(cell);
+        });
+
+        // 2. Distance Grid (How far is the water from the bottom?)
+        const gridDist = document.getElementById('gridDist');
+        gridDist.innerHTML = '';
+        gridDist.style.gridTemplateColumns = `repeat(${GameState.cols}, var(--debug-cell-size))`;
+
+        result.distanceMap.forEach(dist => {
+            const cell = document.createElement('div');
+            cell.className = `debug-cell ${dist === -1 ? 'd-inf' : 'd-val'}`;
+            cell.innerText = dist === -1 ? '-' : dist;
+            gridDist.appendChild(cell);
+        });
+    }
+};
+
+/**
+ * ViewController
+ * Handles the 3D Visualization using CSS Transforms.
+ */
+const ViewController = {
+    rotX: 60, rotZ: -45, scale: 0.8,
+    isDragging: false, lastMouseX: 0, lastMouseY: 0,
+    ticking: false, // Frame rate throttle state
+    isVisible: false,
+
+    // Toggles the inline display instead of a modal
+    toggle3D() {
+        this.isVisible = !this.isVisible;
+        const panel = document.getElementById('view3DPanel');
+        const btn = document.getElementById('btnViz');
+        
+        if (this.isVisible) {
+            panel.classList.add('active');
+            btn.classList.add('active');
+            btn.innerText = "Hide 3D View";
+            this.render3D();
+            this.attach3DEvents();
+        } else {
+            panel.classList.remove('active');
+            btn.classList.remove('active');
+            btn.innerText = "View in 3D";
+            this.detach3DEvents();
+        }
+    },
+
+    render3D() {
+        if(!this.isVisible) return;
+
+        const pivot = document.getElementById('pivotPoint');
+        pivot.innerHTML = '';
+        const rows = GameState.rows;
+        const cols = GameState.cols;
+        const cellSize = 60;
+        const totalWidth = cols * cellSize;
+        const totalHeight = rows * cellSize;
+
+        // Find min/max values to scale the height of the blocks nicely
+        let minVal = Infinity, maxVal = -Infinity;
+        GameState.grid.flat().forEach(v => {
+            if (v < minVal) minVal = v;
+            if (v > maxVal) maxVal = v;
+        });
+
+        for(let r=0; r<rows; r++) {
+            for(let c=0; c<cols; c++) {
+                const val = GameState.grid[r][c];
+                const pillar = document.createElement('div');
+                pillar.className = 'pillar';
+
+                // Calculate position to center the whole grid
+                const x = (c * cellSize) - (totalWidth / 2) + (cellSize / 2);
+                const y = (r * cellSize) - (totalHeight / 2) + (cellSize / 2);
+
+                // Calculate height and color based on value
+                const normalized = (val - minVal) / ((maxVal - minVal) || 1);
+                const heightPx = 20 + (normalized * 150); // Minimum height 20px, max +150px
+                const lightness = 90 - (normalized * 40);
+                const color = `hsl(210, 80%, ${lightness}%)`;
+
+                pillar.style.backgroundColor = color;
+                pillar.style.transform = `translateX(${x}px) translateY(${y}px)`;
+                pillar.style.setProperty('--pillar-height', `${heightPx}px`);
+
+                // 1. Create Cap (Top Face)
+                const cap = document.createElement('div');
+                cap.className = 'wall wall-cap';
+                cap.innerText = val;
+                pillar.appendChild(cap);
+
+
+                // 2. Create 4 Walls (North, South, East, West)
+                // This makes the block look solid from all angles
+                ['north', 'south', 'east', 'west'].forEach(dir => {
+                    const wall = document.createElement('div');
+                    wall.className = `wall wall-${dir}`;
+                    pillar.appendChild(wall);
+                });
+
+                pivot.appendChild(pillar);
+            }
+        }
+        this.updateTransform();
+    },
+
+    updateTransform() {
+        const pivot = document.getElementById('pivotPoint');
+        pivot.style.transform = `scale(${this.scale}) rotateX(${this.rotX}deg) rotateZ(${this.rotZ}deg)`;
+    },
+
+    // --- Mouse Handling for Rotation ---
+    handleMouseDown(e) { 
+        this.isDragging = true; 
+        this.lastMouseX = e.clientX; 
+        this.lastMouseY = e.clientY; 
+        document.getElementById('sceneContainer').style.cursor = 'grabbing'; 
+    },
+
+    // --- Render Loop: Throttles visualization updates for performance ---
+    handleMouseMove(e) {
+        if (!this.isDragging) return;
+
+        // 1. Calculate rotation based on mouse movement immediately
+        this.rotZ += (e.clientX - this.lastMouseX) * 0.5;
+        this.rotX -= (e.clientY - this.lastMouseY) * 0.5;
+        this.rotX = Math.min(Math.max(0, this.rotX), 90); // Prevent flipping upside down
+
+        this.lastMouseX = e.clientX;
+        this.lastMouseY = e.clientY;
+
+        // 2. Request a visual update only if the browser is ready for a new frame
+        if (!this.ticking) {
+            window.requestAnimationFrame(() => {
+                this.updateTransform();
+                this.ticking = false;
+            });
+            this.ticking = true;
+        }
+    },
+
+    handleMouseUp() { 
+        this.isDragging = false; 
+        document.getElementById('sceneContainer').style.cursor = 'move'; 
+    },
+
+    handleWheel(e) { 
+        e.preventDefault(); 
+        this.scale *= (e.deltaY < 0 ? 1.1 : 0.9); 
+        this.scale = Math.min(Math.max(0.2, this.scale), 3.0); 
+        this.updateTransform(); 
+    },
+
+    // Attach mouse listeners
+    attach3DEvents() {
+        const zone = document.getElementById('sceneContainer');
+        this._boundDown = this.handleMouseDown.bind(this);
+        this._boundMove = this.handleMouseMove.bind(this);
+        this._boundUp = this.handleMouseUp.bind(this);
+        this._boundWheel = this.handleWheel.bind(this);
+        
+        // IMPORTANT: Attach events to window for drag continuity, but wheel to zone
+        zone.addEventListener('mousedown', this._boundDown);
+        window.addEventListener('mousemove', this._boundMove);
+        window.addEventListener('mouseup', this._boundUp);
+        zone.addEventListener('wheel', this._boundWheel, { passive: false });
+    },
+    detach3DEvents() {
+        const zone = document.getElementById('sceneContainer');
+        if(!zone) return;
+        zone.removeEventListener('mousedown', this._boundDown);
+        window.removeEventListener('mousemove', this._boundMove);
+        window.removeEventListener('mouseup', this._boundUp);
+        zone.removeEventListener('wheel', this._boundWheel);
+    }
+};
+
+// Close dropdown if clicking outside (New Logic)
+window.onclick = function(event) {
+    if (!event.target.matches('.dropdown-trigger') && !event.target.matches('.dropdown-trigger *')) {
+        const menu = document.getElementById('dropdownMenu');
+        const trigger = document.querySelector('.dropdown-trigger');
+        if (menu && menu.classList.contains('show')) {
+            menu.classList.remove('show');
+            trigger.classList.remove('active');
+        }
+    }
+}
+
+// Start the game when the page loads
+window.onload = () => GameController.initGame();
+
+</script>
+</body>
+</html>

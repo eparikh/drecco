@@ -1,0 +1,168 @@
+#body {
+  background-image: url('./images/lasers5.jpg');
+  background-color: #000000;
+  background-position: center;
+  background-repeat: repeat;
+  background-size: cover;
+}
+
+.sidenav {
+    height: 700px;
+    width: 20px;
+}
+
+#candyAreaR #candyAreaL{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* Remove the navbar's default margin-bottom and rounded borders */
+.navbar {
+  margin-bottom: 0;
+  border-radius: 0;
+}
+
+.row.content {height: 800px}
+
+.container{
+    display: flex;
+    justify-content: center;
+    align-items: top;
+}
+
+#topTitle {
+  color: #ffffff;
+  text-align: center;
+  font-family: "Gill Sans", sans-serif;
+  font-style: oblique;
+  font-size: 50px;
+  font-weight: 600;
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+
+#gameArea {
+  width: 1000px;
+  margin: auto;
+  float: none;
+  margin: 0 auto;
+}
+
+#rowOne {
+  width: 100%;
+  text-align: center;
+  float: none;
+}
+
+#candyR{
+  margin-left: 25%;
+}
+
+#candyL{
+  margin-right: 25%;
+}
+
+.candy{
+  margin: 5px;
+}
+
+#rowTwo {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+#startButton {
+  width: 100px;
+  margin-right: 25px;
+  border-width: 2px;
+  border-color: #2afc45;
+  background-color: #000000;
+  text-align: center;
+  font-family: "Gill Sans", sans-serif;
+  font-size: 20px;
+  outline: 0;
+}
+
+#timeDisplay {
+  display: inline-block;
+  width: 100px;
+  color: #ffffff;
+  text-align: center;
+  font-family: "Gill Sans", sans-serif;
+  font-size: 35px;
+  font-weight: 600;
+}
+
+#resetButton {
+  width: 100px;
+  margin-left: 25px;
+  border-width: 2px;
+  border-color: #2afc45;
+  background-color: #000000;
+  text-align: center;
+  font-family: "Gill Sans", sans-serif;
+  font-size: 20px;
+  outline: 0;
+}
+
+#settingsButton {
+  width: 125px;
+  margin-right: 15px;
+  border-width: 2px;
+  border-color: #2afc45;
+  background-color: #000000;
+  text-align: center;
+  font-family: "Gill Sans", sans-serif;
+  font-size: 20px;
+  outline: 0;
+}
+
+#instructionsButton {
+  width: 125px;
+  margin-left: 15px;
+  border-width: 2px;
+  border-color: #2afc45;
+  background-color: #000000;
+  text-align: center;
+  font-family: "Gill Sans", sans-serif;
+  font-size: 20px;
+  outline: 0;
+}
+
+#popoverContainer {
+  width: 1000px;
+}
+
+.popover {
+  max-width: 100%;
+}
+
+.popover-title {
+  font-size: 10px;
+}
+
+.popover-content {
+  font-family: "Gill Sans", sans-serif;
+  font-size: 15px;
+}
+
+#close {
+  outline: 0;
+}
+
+p {
+  font-family: "Gill Sans", sans-serif;
+  font-size: 15px;
+}
+
+#radioPadding {
+  margin-left: 5px;
+  margin-bottom: 8px;
+}
+
+#footer {
+  width: 100%;
+  text-align: center;
+  float: none;
+}

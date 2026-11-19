@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Jump Snatch</title>
+	<style>
+		html,body {
+			font-family: sans-serif;
+		}
+		canvas {
+			display: none;
+			margin: 30px auto;
+		}
+		#turn {
+			display: none;
+			position: fixed;
+			bottom: 30px;
+			right: 30px;
+			background: #333;
+			padding: 15px;
+			border-radius: 10px;
+			color: #fff;
+			font-size: 20px;
+		}
+		#setupInfo {
+			display: block;
+			text-align: center;
+			margin: 10% 10px 0;
+		}
+		#gameInfo {
+			margin: 10px 0;
+			font-size: 20px;
+			text-align: center;
+		}
+		#StopJump {
+			text-align: center;
+			margin: 25px auto;
+			display: none;
+			background: #FFC300;
+			border: 0;
+			padding: 10px;
+			font-size: 15px;
+			text-transform: uppercase;
+			border-radius: 10px;
+			cursor: pointer;
+			width: 100px;
+		}
+		#popupOverlay {
+			display: none;
+			position: fixed;
+			top: 0;
+			left: 0;
+			background: rgba(0,0,0,0.5);
+			width: 100vw;
+			height: 100vh;
+		}
+		#popupText {
+			position: fixed;
+			top: calc(50% - 115px);
+			left: calc(50% - 215px);
+			background: #fff;
+			width: 400px;
+			height: 200px;
+			display: none;
+			justify-content: center;
+			align-items: center;
+			border-radius: 10px;
+			border: 15px solid #fff;
+			overflow: auto;
+		}
+		#closePopupBtn {
+			display: none;
+			position: fixed;
+			top: calc(50% - 115px);
+			left: calc(50% + 179px);
+			margin: 6px;
+			font-size: 25px;
+			color: #d00;
+			cursor: pointer;
+		}
+		#moveType {
+			display: none;
+			position: fixed;
+			bottom: 30px;
+			left: 30px;
+			background: #333;
+			padding: 15px;
+			border-radius: 10px;
+			opacity: 1;
+			color: #fff;
+		}
+		#gameStart {
+			background: #333;
+			padding: 10px;
+			border: 0;
+			border-radius: 10px;
+			color: #fff;			
+			cursor: pointer;
+		}
+</style>
+<script src = "util.js"></script>
+</head>
+<body>
+	<div id="setupInfo">
+		<span>Board Size: </span>
+		<input id="boardSize" type="number" name="Board Size" placeholder="Board Size">
+		<input id="gameStart" type="submit" name="Start Game" value="Start Game">
+	</div>
+	<div id="gameInfo">
+		<div id="turn"></div>
+		<div id="moveType"></div>
+		<canvas width="0" height="0"></canvas>
+		<div id="StopJump"><b>Stop Jump</b><br><small><small>(ESC)</small></small></div>
+		<div id="Hint"></div>
+	</div>
+	<div id="popup">
+		<div id="popupOverlay"></div>
+		<div id="popupText"></div>
+		<div id="closePopupBtn">&#x2715;</div>
+	</div>
+	<script src = "game.js"></script>
+</body>
+</html>

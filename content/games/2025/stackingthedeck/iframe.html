@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Stacking the Deck</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #f5f5f8;
+      --panel-bg: #ffffff;
+      --accent: #2f6feb;
+      --accent-soft: #e5efff;
+      --danger: #e53935;
+      --success: #388e3c;
+      --text-main: #222222;
+      --text-muted: #666666;
+      --border-soft: #d0d4e0;
+      --card-border: #666666;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+    }
+
+    #app {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 1.8rem;
+    }
+
+    p {
+      margin: 0.3rem 0;
+    }
+
+    .mode-toggle {
+      display: inline-flex;
+      border-radius: 999px;
+      background: #e2e6f2;
+      padding: 2px;
+    }
+
+    .pill-btn {
+      border: none;
+      background: transparent;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+
+    .pill-btn.selected {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .panel {
+      background: var(--panel-bg);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e2e3f0;
+    }
+
+    .panel-header {
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .panel-header span {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .field-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 16px;
+      margin: 6px 0;
+      font-size: 0.9rem;
+    }
+
+    .field-row label {
+      font-weight: 500;
+    }
+
+    .field-row input[type="number"],
+    .field-row input[type="text"],
+    .field-row select {
+      padding: 3px 6px;
+      font-size: 0.9rem;
+    }
+
+    .field-row input[type="number"] {
+      width: 70px;
+    }
+
+    button.primary {
+      border: none;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #ffffff;
+      padding: 6px 16px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    button.primary:disabled {
+      background: #c1c7e8;
+      cursor: default;
+    }
+
+    button.secondary {
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: #f7f7fc;
+      padding: 5px 12px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    button.secondary:hover:not(:disabled) {
+      background: #eceffd;
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .deck-row {
+      display: flex;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin: 6px 0;
+    }
+
+    .card {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 52px;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      background: #ffffff;
+      font-weight: 600;
+      font-size: 1rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-s {
+      background: #ffffff;
+    }
+
+    .card-v {
+      background: #f1f7ff;
+      border-color: var(--accent);
+    }
+
+    .card.selected {
+      outline: 2px solid #ff9800;
+      outline-offset: 1px;
+    }
+
+    .card-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .trace-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ffd54f;
+      margin-top: 3px;
+    }
+
+    .trace-dot-hidden {
+      visibility: hidden;
+    }
+
+    .slot-btn {
+      width: 22px;
+      height: 52px;
+      border-radius: 4px;
+      border: 1px dashed #b0b5c8;
+      background: #fafbff;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .slot-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .section-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+
+    .v-pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .s-pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .s-order-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .pill-muted {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .status-line {
+      margin-top: 6px;
+      font-size: 0.9rem;
+    }
+
+    .status-success {
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .status-danger {
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    table.results {
+      border-collapse: collapse;
+      margin-top: 6px;
+      font-size: 0.85rem;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    table.results th,
+    table.results td {
+      border: 1px solid #dde0ec;
+      padding: 4px 6px;
+      text-align: center;
+    }
+
+    table.results th {
+      background: #f2f3fb;
+    }
+
+    .trace-box {
+      margin-top: 6px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: #f7f7ff;
+      font-size: 0.8rem;
+    }
+
+    .manual-values {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .manual-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .manual-chip button {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: #555;
+      padding: 0 2px;
+    }
+
+    .value-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .value-btn {
+      min-width: 32px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: #f8f8ff;
+      font-size: 0.85rem;
+      padding: 4px 7px;
+      cursor: pointer;
+    }
+
+    .value-btn.disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .small-note {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    @media (max-width: 640px) {
+      .deck-row {
+        gap: 2px;
+      }
+
+      .card {
+        width: 32px;
+        height: 46px;
+        font-size: 0.9rem;
+      }
+
+      .slot-btn {
+        width: 20px;
+        height: 46px;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    (function () {
+      // ---------- Core game logic ----------
+
+      function createDeck() {
+        const cards = [];
+        for (let v = 1; v <= 8; v++) {
+          cards.push({ id: "H" + v, value: v, suit: "♥", source: null });
+          cards.push({ id: "S" + v, value: v, suit: "♠", source: null });
+        }
+        return cards;
+      }
+
+      function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const tmp = array[i];
+          array[i] = array[j];
+          array[j] = tmp;
+        }
+        return array;
+      }
+
+      // Randomly choose which cards are blue (extra) and which are white (main row)
+      function randomSplitDeck(allCards, vSize) {
+        const deckShuffled = shuffle(allCards.slice());
+        const size = Math.min(vSize, deckShuffled.length);
+
+        const vCards = deckShuffled.slice(0, size);   // blue extras
+        const sCards = deckShuffled.slice(size);      // white main row
+
+        // Make sure at least one blue card is an ace (1)
+        const hasAceInBlue = vCards.some((c) => c.value === 1);
+        if (!hasAceInBlue) {
+          const idxInWhite = sCards.findIndex((c) => c.value === 1);
+          if (idxInWhite !== -1 && vCards.length > 0) {
+            const tmp = vCards[0];
+            vCards[0] = sCards[idxInWhite];
+            sCards[idxInWhite] = tmp;
+          }
+        }
+
+        vCards.forEach((c) => (c.source = "V"));
+        sCards.forEach((c) => (c.source = "S"));
+        return { vCards, sCards };
+      }
+
+      // Build blue extra cards from chosen values; the rest become white
+      function buildCardsFromManual(allCards, manualVValues) {
+        const remaining = allCards.slice();
+        const vCards = [];
+
+        manualVValues.forEach((v) => {
+          const idx = remaining.findIndex((c) => c.value === v);
+          if (idx === -1) return;
+          const card = remaining.splice(idx, 1)[0];
+          vCards.push(card);
+        });
+
+        const sCards = remaining;
+        vCards.forEach((c) => (c.source = "V"));
+        sCards.forEach((c) => (c.source = "S"));
+        shuffle(sCards);
+
+        return { vCards, sCards };
+      }
+
+      // Simulate the game for a specific starting number
+      function simulateOutcome(deckValues, start) {
+        const n = deckValues.length;
+        const steps = [];
+
+        if (start < 1 || start > 8) {
+          return { outcome: "invalid", steps: [] };
+        }
+        if (start > n) {
+          return { outcome: "Charles", steps: [] };
+        }
+
+        let pos = start - 1;
+        let last = deckValues[pos];
+        let remaining = n - (pos + 1);
+        steps.push({ pos, value: last, remainingAfter: remaining });
+
+        while (true) {
+          // If we land on last card and it's 1 -> Arranger wins
+          if (pos === n - 1 && last === 1) {
+            return { outcome: "Alice", steps: steps };
+          }
+          // If jump is too big -> Chooser wins
+          if (last > remaining) {
+            return { outcome: "Charles", steps: steps };
+          }
+          pos = pos + last;
+          last = deckValues[pos];
+          remaining = n - (pos + 1);
+          steps.push({ pos, value: last, remainingAfter: remaining });
+        }
+      }
+
+      // Evaluate all starting numbers 1..8 for single-player mode
+      function evaluateDeck(cards) {
+        const values = cards.map((c) => c.value);
+        const byStart = {};
+        const startsAlice = [];
+        const startsCharles = [];
+
+        for (let start = 1; start <= 8; start++) {
+          const res = simulateOutcome(values, start);
+          byStart[start] = res;
+          if (res.outcome === "Alice") startsAlice.push(start);
+          else if (res.outcome === "Charles") startsCharles.push(start);
+        }
+
+        const allAlice = startsAlice.length === 8;
+        const anyCharles = startsCharles.length > 0;
+        let status = "unknown";
+        if (allAlice) status = "aliceSafe";
+        else if (anyCharles) status = "charlesCanWin";
+
+        return { values, byStart, startsAlice, startsCharles, status };
+      }
+
+      // Which card positions should show yellow dots?
+      function getHighlightedCardPositions() {
+        const positions = new Set();
+
+        // Single-player highlight
+        if (
+          state.phase === "resultSingle" &&
+          state.simulateResults &&
+          state.selectedTraceStart != null
+        ) {
+          const res = state.simulateResults.byStart[state.selectedTraceStart];
+          if (res && res.steps) {
+            res.steps.forEach((step) => positions.add(step.pos));
+          }
+        }
+
+        // Two-player highlight
+        if (
+          state.phase === "chooseStart2p" &&
+          state.twoTrace &&
+          Array.isArray(state.twoTrace)
+        ) {
+          state.twoTrace.forEach((step) => positions.add(step.pos));
+        }
+
+        return positions;
+      }
+
+      // ---------- State ----------
+
+      const state = {
+        mode: "single",            // "single" or "two"
+        vSize: 5,
+        vSelectionMode: "random",  // "random" or "manual"
+        phase: "setup",            // setup | selectVManual | arrangeS | arrange | resultSingle | chooseStart2p
+
+        arrangerName: "Arranger",
+        chooserName: "Chooser",
+
+        allCards: [],
+        manualVValues: [],
+        vCards: [],                // blue extra cards
+        sCards: [],                // white cards (pool)
+        sOrder: [],                // white cards in final order
+        initialVCards: [],
+        initialDeckFromS: [],
+        deck: [],                  // full deck (white+blue)
+        selectedVIndex: null,
+
+        simulateResults: null,     // for single-player
+        selectedTraceStart: null,
+
+        twoStart: 1,               // for 2-player last step
+        twoOutcome: null,
+        twoTrace: null
+      };
+
+      function resetForNewGame() {
+        state.allCards = [];
+        state.manualVValues = [];
+        state.vCards = [];
+        state.sCards = [];
+        state.sOrder = [];
+        state.initialVCards = [];
+        state.initialDeckFromS = [];
+        state.deck = [];
+        state.selectedVIndex = null;
+        state.simulateResults = null;
+        state.selectedTraceStart = null;
+        state.twoStart = 1;
+        state.twoOutcome = null;
+        state.twoTrace = null;
+        state.phase = "setup";
+      }
+
+      // ---------- Handlers ----------
+
+      function handleSetMode(newMode) {
+        if (newMode !== "single" && newMode !== "two") return;
+        state.mode = newMode;
+        render();
+      }
+
+      function handleVSizeChange(newVal) {
+        const v = parseInt(newVal, 10);
+        if (!Number.isFinite(v)) return;
+        state.vSize = Math.max(1, Math.min(16, v));
+        render();
+      }
+
+      function handleSetVSelectionMode(mode) {
+        if (mode !== "random" && mode !== "manual") return;
+        state.vSelectionMode = mode;
+        render();
+      }
+
+      function handleArrangerNameChange(val) {
+        state.arrangerName = val || "Arranger";
+      }
+
+      function handleChooserNameChange(val) {
+        state.chooserName = val || "Chooser";
+      }
+
+      function handleStartSetup() {
+        resetForNewGame();
+        state.allCards = createDeck();
+
+        if (state.vSelectionMode === "random") {
+          const split = randomSplitDeck(state.allCards, state.vSize);
+          state.vCards = split.vCards;
+          state.sCards = split.sCards;
+          state.initialVCards = split.vCards.slice();
+
+          if (state.mode === "single") {
+            state.deck = state.sCards.slice();
+            state.initialDeckFromS = state.deck.slice();
+            state.phase = "arrange";
+          } else {
+            state.sOrder = [];
+            state.deck = [];
+            state.initialDeckFromS = [];
+            state.phase = "arrangeS";
+          }
+        } else {
+          state.phase = "selectVManual";
+        }
+
+        render();
+      }
+
+      function countValueInManual(v) {
+        return state.manualVValues.filter((x) => x === v).length;
+      }
+
+      function handleManualAddValue(v) {
+        const count = countValueInManual(v);
+        if (count >= 2) {
+          alert("There are only two cards of each number in the deck.");
+          return;
+        }
+        if (state.manualVValues.length >= state.vSize) {
+          alert(
+            "You already picked " +
+              state.vSize +
+              " blue cards. Remove one if you want to change."
+          );
+          return;
+        }
+        state.manualVValues.push(v);
+        render();
+      }
+
+      function handleManualRemoveIndex(idx) {
+        if (idx < 0 || idx >= state.manualVValues.length) return;
+        state.manualVValues.splice(idx, 1);
+        render();
+      }
+
+      function handleManualDone() {
+        if (state.manualVValues.length !== state.vSize) {
+          alert(
+            "Please choose exactly " +
+              state.vSize +
+              " blue cards (currently: " +
+              state.manualVValues.length +
+              ")."
+          );
+          return;
+        }
+        if (!state.manualVValues.includes(1)) {
+          alert("At least one blue card must be a 1 (ace).");
+          return;
+        }
+
+        const split = buildCardsFromManual(
+          state.allCards,
+          state.manualVValues.slice()
+        );
+        state.vCards = split.vCards;
+        state.initialVCards = split.vCards.slice();
+
+        if (state.mode === "single") {
+          state.sCards = split.sCards;
+          state.deck = state.sCards.slice();
+          state.initialDeckFromS = state.deck.slice();
+          state.phase = "arrange";
+        } else {
+          state.sCards = split.sCards;
+          state.sOrder = [];
+          state.deck = [];
+          state.initialDeckFromS = [];
+          state.phase = "arrangeS";
+        }
+
+        state.selectedVIndex = null;
+        state.simulateResults = null;
+        state.selectedTraceStart = null;
+        render();
+      }
+
+      // White cards ordering (Chooser)
+      function handlePickSIndex(idx) {
+        if (idx < 0 || idx >= state.sCards.length) return;
+        const card = state.sCards.splice(idx, 1)[0];
+        state.sOrder.push(card);
+        render();
+      }
+
+      function handleRemoveSOrderIndex(idx) {
+        if (idx < 0 || idx >= state.sOrder.length) return;
+        const card = state.sOrder.splice(idx, 1)[0];
+        state.sCards.push(card);
+        render();
+      }
+
+      function handleSClear() {
+        state.sCards = state.sCards.concat(state.sOrder);
+        state.sOrder = [];
+        render();
+      }
+
+      function handleSDone() {
+        if (state.sCards.length > 0) {
+          alert(
+            "You must place all white cards into the line. " +
+              state.sCards.length +
+              " card(s) still in the pool."
+          );
+          return;
+        }
+        state.deck = state.sOrder.slice();
+        state.initialDeckFromS = state.deck.slice();
+        state.phase = "arrange"; // next: blue cards insertion
+        render();
+      }
+
+      // Blue cards insertion (Arranger)
+      function handleSelectVIndex(idx) {
+        if (idx < 0 || idx >= state.vCards.length) return;
+        state.selectedVIndex =
+          state.selectedVIndex === idx ? null : idx;
+        render();
+      }
+
+      function handleInsertAt(slotIndex) {
+        if (state.vCards.length === 0) return;
+        if (state.selectedVIndex == null) {
+          alert("First click a blue card, then click a dot where you want to drop it.");
+          return;
+        }
+        const idx = state.selectedVIndex;
+        const card = state.vCards.splice(idx, 1)[0];
+        if (slotIndex < 0) slotIndex = 0;
+        if (slotIndex > state.deck.length) slotIndex = state.deck.length;
+        state.deck.splice(slotIndex, 0, card);
+
+        state.selectedVIndex = null;
+        state.simulateResults = null;
+        state.selectedTraceStart = null;
+        state.twoOutcome = null;
+        state.twoTrace = null;
+        render();
+      }
+
+      function handleResetInsertion() {
+        state.vCards = state.initialVCards.slice();
+        state.deck = state.initialDeckFromS.slice();
+        state.selectedVIndex = null;
+        state.simulateResults = null;
+        state.selectedTraceStart = null;
+        state.twoOutcome = null;
+        state.twoTrace = null;
+        render();
+      }
+
+      function handleCheckArrangement() {
+        if (state.deck.length !== 16) {
+          const remaining = 16 - state.deck.length;
+          alert(
+            "You must place all blue cards into the deck. " +
+              remaining +
+              " card(s) still need to be placed."
+          );
+          return;
+        }
+
+        if (state.mode === "single") {
+          state.simulateResults = evaluateDeck(state.deck);
+          state.selectedTraceStart = null;
+          state.phase = "resultSingle";
+        } else {
+          state.twoStart = 1;
+          state.twoOutcome = null;
+          state.twoTrace = null;
+          state.phase = "chooseStart2p";
+        }
+        render();
+      }
+
+      // 2-player: chooser picks starting number
+      function handleTwoStartChange(val) {
+        const v = parseInt(val, 10);
+        if (!Number.isFinite(v)) return;
+        state.twoStart = Math.max(1, Math.min(8, v));
+      }
+
+      function handleTwoRun() {
+        const values = state.deck.map((c) => c.value);
+        const res = simulateOutcome(values, state.twoStart);
+        state.twoOutcome = res.outcome;
+        state.twoTrace = res.steps;
+        render();
+      }
+
+      function handleSetTraceStart(start) {
+        if (!state.simulateResults) return;
+        state.selectedTraceStart = start;
+        render();
+      }
+
+      function handleBackToArrange() {
+        state.phase = "arrange";
+        state.selectedTraceStart = null;
+        state.twoOutcome = null;
+        state.twoTrace = null;
+        render();
+      }
+
+      function handleNewRound() {
+        resetForNewGame();
+        render();
+      }
+
+      // ---------- Rendering ----------
+
+      function renderSetup() {
+        const vModeRandomSelected =
+          state.vSelectionMode === "random" ? "selected" : "";
+        const vModeManualSelected =
+          state.vSelectionMode === "manual" ? "selected" : "";
+
+        return `
+          <div class="panel">
+            <div class="panel-header">
+              Setup
+              <span>Pick who is playing and how many extra cards the hider gets.</span>
+            </div>
+
+            <div class="field-row">
+              <label>Players:</label>
+              <div class="mode-toggle">
+                <button class="pill-btn ${
+                  state.mode === "single" ? "selected" : ""
+                }" data-action="set-mode" data-mode="single">
+                  1 Player (you vs. computer)
+                </button>
+                <button class="pill-btn ${
+                  state.mode === "two" ? "selected" : ""
+                }" data-action="set-mode" data-mode="two">
+                  2 Players
+                </button>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <label>Arranger name:</label>
+              <input id="arranger-name-input" type="text"
+                     value="${state.arrangerName}" />
+            </div>
+            <div class="field-row">
+              <label>Chooser name:</label>
+              <input id="chooser-name-input" type="text"
+                     value="${state.chooserName}" />
+              <span class="hint">(Used when there are 2 players.)</span>
+            </div>
+
+            <div class="field-row">
+              <label for="v-size-input">Number of extra blue cards:</label>
+              <input id="v-size-input" type="number" min="1" max="16"
+                     value="${state.vSize}" />
+              <span class="hint">
+                These blue cards belong to the Arranger and can be hidden between the white cards.
+              </span>
+            </div>
+
+            <div class="field-row">
+              <label>How to pick the extra blue cards:</label>
+              <div class="mode-toggle">
+                <button class="pill-btn ${vModeRandomSelected}"
+                        data-action="set-vmode" data-vmode="random">
+                  Let the game choose them
+                </button>
+                <button class="pill-btn ${vModeManualSelected}"
+                        data-action="set-vmode" data-vmode="manual">
+                  Let me choose them
+                </button>
+              </div>
+            </div>
+
+            <button class="primary" id="start-setup-btn">
+              Deal the cards
+            </button>
+            <div class="hint">
+              There are always 16 cards: two of each number from 1 to 8
+              (ace counts as 1). At least one of the blue cards must be a 1.
+              The white cards will make the first row, and the blue cards will be
+              slipped in later.
+            </div>
+          </div>
+        `;
+      }
+
+      function renderManualSelection() {
+        const remainingChoices = state.vSize - state.manualVValues.length;
+        const valButtons = [];
+        for (let v = 1; v <= 8; v++) {
+          const count = countValueInManual(v);
+          const remainingOfThis = 2 - count;
+          const disabled = remainingOfThis <= 0;
+          valButtons.push(`
+            <button class="value-btn ${
+              disabled ? "disabled" : ""
+            }" data-action="manual-add" data-value="${v}"
+                    ${disabled ? "disabled" : ""}>
+              ${v} ${
+                remainingOfThis < 2 ? "(left: " + remainingOfThis + ")" : ""
+              }
+            </button>
+          `);
+        }
+
+        const chips = state.manualVValues
+          .map(
+            (v, idx) => `
+            <span class="manual-chip">
+              ${v}
+              <button type="button" data-action="manual-remove" data-index="${idx}">&times;</button>
+            </span>
+          `
+          )
+          .join("");
+
+        return `
+          <div class="panel">
+            <div class="panel-header">
+              Choose your extra blue cards (by number)
+              <span>You must include at least one 1 (ace).</span>
+            </div>
+            <p class="small-note">
+              Click numbers to pick which cards will be blue extra cards.
+              Each number 1–8 appears at most twice in the whole deck.
+            </p>
+            <div class="field-row">
+              <span class="badge">Blue cards to pick: ${state.vSize}</span>
+              <span class="pill-muted">Still need to choose: ${remainingChoices}</span>
+            </div>
+
+            <div class="value-buttons">
+              ${valButtons.join("")}
+            </div>
+
+            <div class="manual-values">
+              ${
+                chips ||
+                '<span class="small-note">No blue cards chosen yet.</span>'
+              }
+            </div>
+
+            <div class="field-row" style="margin-top:8px;">
+              <button class="primary" id="manual-done-btn">
+                Use these blue cards
+              </button>
+              <button class="secondary" id="manual-cancel-btn">
+                Back to setup
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderArrangeSPanel() {
+        const totalMain = state.sCards.length + state.sOrder.length;
+
+        const poolButtons = state.sCards
+          .map((card, idx) => {
+            return `
+              <button class="card card-s"
+                      data-action="pick-s" data-sindex="${idx}">
+                ${card.value}
+              </button>
+            `;
+          })
+          .join("");
+
+        const lineButtons = state.sOrder
+          .map((card, idx) => {
+            return `
+              <button class="card card-s"
+                      title="Take this card back into the pool"
+                      data-action="remove-sorder" data-index="${idx}">
+                ${card.value}
+              </button>
+            `;
+          })
+          .join("");
+
+        const chooser = state.chooserName || "Chooser";
+
+        return `
+          <div class="panel">
+            <div class="panel-header">
+              ${chooser}: make the first row of cards
+              <span>Pick the order of your white cards.</span>
+            </div>
+            <p class="small-note">
+              These white cards are <strong>your</strong> part of the deck.
+              Click a card in the pool to place it into a line.
+              The line (from left to right) becomes the order of the deck.
+              Later, ${state.arrangerName || "the other player"} will slide some
+              blue “extra” cards in between, but they are <strong>not allowed</strong>
+              to change the order of your white cards.
+            </p>
+
+            <div class="section-title">
+              White card pool (${state.sCards.length} left out of ${totalMain}):
+            </div>
+            <div class="s-pool">
+              ${
+                poolButtons ||
+                '<span class="small-note">No cards left in the pool. All white cards are in your line.</span>'
+              }
+            </div>
+
+            <div class="section-title">
+              Your white card line (top of deck is on the left,
+              ${state.sOrder.length}/${totalMain} cards):
+            </div>
+            <div class="s-order-row">
+              ${
+                lineButtons ||
+                '<span class="small-note">Click cards from the pool to build your line.</span>'
+              }
+            </div>
+
+            <div class="field-row" style="margin-top:8px;">
+              <button class="secondary" id="s-clear-btn">
+                Start over
+              </button>
+              <button class="primary" id="s-done-btn">
+                I’m happy with this order
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderDeckAndPool() {
+        const highlightPositions = getHighlightedCardPositions();
+
+        const deckParts = [];
+        for (let i = 0; i <= state.deck.length; i++) {
+          const disabled = state.vCards.length === 0 ? "disabled" : "";
+          const title =
+            state.vCards.length === 0
+              ? "All blue cards are already in the deck"
+              : "Click to drop a blue card here";
+          deckParts.push(
+            `<button class="slot-btn" title="${title}"
+                     data-action="insert-slot" data-slot="${i}" ${disabled}>•</button>`
+          );
+
+          if (i < state.deck.length) {
+            const card = state.deck[i];
+            const highlighted = highlightPositions.has(i);
+            const classes =
+              "card " + (card.source === "S" ? "card-s" : "card-v");
+
+            deckParts.push(`
+              <div class="card-wrap">
+                <div class="${classes}">${card.value}</div>
+                <div class="trace-dot ${highlighted ? "" : "trace-dot-hidden"}"></div>
+              </div>
+            `);
+          }
+        }
+
+        const blueButtons = state.vCards
+          .map((card, idx) => {
+            const selected = state.selectedVIndex === idx ? "selected" : "";
+            return `
+              <button class="card card-v ${selected}"
+                      data-action="select-v" data-vindex="${idx}">
+                ${card.value}
+              </button>
+            `;
+          })
+          .join("");
+
+        const who =
+          state.mode === "two"
+            ? (state.arrangerName || "Arranger")
+            : "You";
+
+        return `
+          <div class="panel">
+            <div class="panel-header">
+              ${who}: hide your extra cards
+              <span>Slide blue cards between the white ones.</span>
+            </div>
+
+            <p class="small-note">
+              The white cards are the first row chosen by the other player.
+              The blue cards are <strong>your extra cards</strong>.
+              First click a blue card, then click a little
+              <strong>dot (•)</strong> to drop it in that place.
+              You can put blue cards anywhere you like, but you must keep the
+              order of the white cards exactly the same.
+            </p>
+
+            <div class="section-title">Deck so far (top is on the left):</div>
+            <div class="deck-row">
+              ${deckParts.join("")}
+            </div>
+
+            <div class="section-title">
+              Your blue extra cards (${state.vCards.length} still in your hand):
+            </div>
+            <div class="v-pool">
+              ${
+                blueButtons ||
+                '<span class="small-note">All blue cards are in the deck. Nice!</span>'
+              }
+            </div>
+
+            <div class="field-row" style="margin-top:8px;">
+              <button class="secondary" id="reset-insertion-btn">
+                Put blue cards back and try again
+              </button>
+              <button class="primary" id="check-arrangement-btn">
+                ${
+                  state.mode === "two"
+                    ? "Let the chooser pick a number"
+                    : "See who can win"
+                }
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderResultsSingle() {
+        if (!state.simulateResults) return "";
+
+        const res = state.simulateResults;
+        const arrName = state.arrangerName || "Arranger";
+        const choName = state.chooserName || "Chooser";
+        const aliceStarts = res.startsAlice.join(", ") || "–";
+        const charlesStarts = res.startsCharles.join(", ") || "–";
+
+        let statusLine = "";
+        let statusClass = "";
+        if (res.status === "aliceSafe") {
+          statusLine =
+            "You (" +
+            arrName +
+            ") win: this arrangement is safe. Every starting number 1–8 ends on the final ace.";
+          statusClass = "status-success";
+        } else if (res.status === "charlesCanWin") {
+          statusLine =
+            choName +
+            " can win: there is at least one starting number that jumps past the end of the deck.";
+          statusClass = "status-danger";
+        } else {
+          statusLine =
+            "This arrangement is unusual: not all starts end on the final ace, but no start clearly jumps past the end.";
+          statusClass = "status-danger";
+        }
+
+        const rows = [];
+        for (let start = 1; start <= 8; start++) {
+          const o = res.byStart[start];
+          const label = o.outcome === "Alice" ? arrName : choName;
+          rows.push(`
+            <tr>
+              <td>${start}</td>
+              <td>${label}</td>
+              <td>
+                <button class="secondary" data-action="show-trace" data-start="${start}">
+                  Show on deck
+                </button>
+              </td>
+            </tr>
+          `);
+        }
+
+        let traceHtml = "";
+        if (
+          state.selectedTraceStart != null &&
+          res.byStart[state.selectedTraceStart]
+        ) {
+          const start = state.selectedTraceStart;
+          const t = res.byStart[start];
+          const finalWinner = t.outcome === "Alice" ? arrName : choName;
+
+          traceHtml = `
+            <div class="trace-box">
+              <div><strong>Starting number:</strong> ${start}</div>
+              <div><strong>Winner:</strong> ${finalWinner}</div>
+              <div class="small-note" style="margin-top:4px;">
+                Look at the deck above: the cards that were flipped for this
+                starting number have a little
+                <span style="color:#ffb300;font-weight:bold;">yellow dot</span>
+                under them.
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="panel">
+            <div class="panel-header">
+              Results (single-player)
+              <span>See who can force a win.</span>
+            </div>
+            <div class="status-line ${statusClass}">
+              ${statusLine}
+            </div>
+            <p class="small-note">
+              If the jump goes past the end of the deck, ${choName} wins.
+              If the jumps land exactly on the last card and it is a 1 (ace),
+              then ${arrName} wins.
+            </p>
+
+            <table class="results">
+              <thead>
+                <tr>
+                  <th>Start</th>
+                  <th>Winner</th>
+                  <th>Show path</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows.join("")}
+              </tbody>
+            </table>
+
+            <p class="small-note">
+              Starts where ${arrName} wins: ${aliceStarts}<br />
+              Starts where ${choName} wins: ${charlesStarts}
+            </p>
+
+            ${traceHtml}
+
+            <div class="field-row" style="margin-top:8px;">
+              <button class="secondary" id="back-arrange-btn">
+                Re-arrange this deck
+              </button>
+              <button class="primary" id="new-round-btn">
+                New round
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderChooseStart2p() {
+        const arrName = state.arrangerName || "Arranger";
+        const choName = state.chooserName || "Chooser";
+
+        let resultHtml = "";
+        if (state.twoOutcome) {
+          const winner =
+            state.twoOutcome === "Alice" ? arrName : choName;
+
+          resultHtml = `
+            <div class="trace-box">
+              <div><strong>Winner:</strong> ${winner}</div>
+              <div class="small-note" style="margin-top:4px;">
+                Look at the deck above: the cards that were flipped on the way
+                have a little
+                <span style="color:#ffb300;font-weight:bold;">yellow dot</span>
+                under them.
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="panel">
+            <div class="panel-header">
+              ${choName}: pick the starting number
+              <span>Choose where Judy starts counting.</span>
+            </div>
+            <p class="small-note">
+              The deck is ready now!
+              ${choName}, choose a number from <strong>1</strong> to <strong>8</strong>.
+              We start at that card in the deck, flip it over, and then jump forward
+              by the number on the card.
+              We keep jumping like this, always using the number we just saw.
+              <br /><br />
+              If we ever have to jump more cards than are left in the deck,
+              <strong>${choName} wins</strong> (we “jump past” the end).
+              If we land exactly on the <strong>very last card</strong>
+              and that card is an <strong>ace (1)</strong>,
+              then <strong>${arrName} wins</strong>.
+            </p>
+
+            <div class="field-row">
+              <label for="two-start-select">Starting number:</label>
+              <select id="two-start-select">
+                ${[1,2,3,4,5,6,7,8].map(n =>
+                  `<option value="${n}" ${n===state.twoStart?"selected":""}>${n}</option>`
+                ).join("")}
+              </select>
+              <button class="primary" id="two-run-btn">
+                Flip the cards!
+              </button>
+            </div>
+
+            ${resultHtml}
+
+            <div class="field-row" style="margin-top:8px;">
+              <button class="secondary" id="back-arrange-btn">
+                Go back and change the deck
+              </button>
+              <button class="primary" id="new-round-btn">
+                Play a new round
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      function render() {
+        const app = document.getElementById("app");
+        if (!app) return;
+
+        let content = `
+          <h1>Stacking the Deck</h1>
+          <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:10px;">
+            There are 16 cards: two of each number from 1 to 8 (ace counts as 1).
+            The Chooser picks where to start, then we keep jumping forward by the
+            number on the card we flip. If we jump past the end, the Chooser wins.
+            If we land exactly on the last card and it is a 1 (ace), the Arranger wins.
+          </p>
+        `;
+
+        content += renderSetup();
+
+        if (state.phase === "selectVManual") {
+          content += renderManualSelection();
+        }
+
+        if (state.phase === "arrangeS") {
+          content += renderArrangeSPanel();
+        }
+
+        if (
+          state.phase === "arrange" ||
+          state.phase === "resultSingle" ||
+          state.phase === "chooseStart2p"
+        ) {
+          content += renderDeckAndPool();
+        }
+
+        if (state.phase === "resultSingle") {
+          content += renderResultsSingle();
+        }
+
+        if (state.phase === "chooseStart2p") {
+          content += renderChooseStart2p();
+        }
+
+        app.innerHTML = content;
+        attachEventHandlers();
+      }
+
+      function attachEventHandlers() {
+        // Mode toggle
+        document
+          .querySelectorAll("[data-action='set-mode']")
+          .forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              const mode = btn.getAttribute("data-mode");
+              handleSetMode(mode);
+            });
+          });
+
+        const vSizeInput = document.getElementById("v-size-input");
+        if (vSizeInput) {
+          vSizeInput.addEventListener("change", function (e) {
+            handleVSizeChange(e.target.value);
+          });
+        }
+
+        const arrNameInput = document.getElementById("arranger-name-input");
+        if (arrNameInput) {
+          arrNameInput.addEventListener("input", function (e) {
+            handleArrangerNameChange(e.target.value);
+          });
+        }
+
+        const choNameInput = document.getElementById("chooser-name-input");
+        if (choNameInput) {
+          choNameInput.addEventListener("input", function (e) {
+            handleChooserNameChange(e.target.value);
+          });
+        }
+
+        // V selection mode
+        document
+          .querySelectorAll("[data-action='set-vmode']")
+          .forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              const mode = btn.getAttribute("data-vmode");
+              handleSetVSelectionMode(mode);
+            });
+          });
+
+        const startSetupBtn = document.getElementById("start-setup-btn");
+        if (startSetupBtn) {
+          startSetupBtn.addEventListener("click", function () {
+            handleStartSetup();
+          });
+        }
+
+        // Manual blue-card selection
+        document
+          .querySelectorAll("[data-action='manual-add']")
+          .forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              const v = parseInt(btn.getAttribute("data-value"), 10);
+              handleManualAddValue(v);
+            });
+          });
+
+        document
+          .querySelectorAll("[data-action='manual-remove']")
+          .forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              const idx = parseInt(btn.getAttribute("data-index"), 10);
+              handleManualRemoveIndex(idx);
+            });
+          });
+
+        const manualDoneBtn = document.getElementById("manual-done-btn");
+        if (manualDoneBtn) {
+          manualDoneBtn.addEventListener("click", function () {
+            handleManualDone();
+          });
+        }
+
+        const manualCancelBtn = document.getElementById("manual-cancel-btn");
+        if (manualCancelBtn) {
+          manualCancelBtn.addEventListener("click", function () {
+            resetForNewGame();
+            render();
+          });
+        }
+
+        // White cards (first row)
+        document
+          .querySelectorAll("[data-action='pick-s']")
+          .forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              const idx = parseInt(btn.getAttribute("data-sindex"), 10);
+              handlePickSIndex(idx);
+            });
+          });
+
+        document
+          .querySelectorAll("[data-action='remove-sorder']")
+          .forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              const idx = parseInt(btn.getAttribute("data-index"), 10);
+              handleRemoveSOrderIndex(idx);
+            });
+          });
+
+        const sClearBtn = document.getElementById("s-clear-btn");
+        if (sClearBtn) {
+          sClearBtn.addEventListener("click", function () {
+            handleSClear();
+          });
+        }
+
+        const sDoneBtn = document.getElementById("s-done-btn");
+        if (sDoneBtn) {
+          sDoneBtn.addEventListener("click", function () {
+            handleSDone();
+          });
+        }
+
+        // Blue cards insertion
+        document
+          .querySelectorAll("[data-action='select-v']")
+          .forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              const idx = parseInt(btn.getAttribute("data-vindex"), 10);
+              handleSelectVIndex(idx);
+            });
+          });
+
+        document
+          .querySelectorAll("[data-action='insert-slot']")
+          .forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              const slot = parseInt(btn.getAttribute("data-slot"), 10);
+              handleInsertAt(slot);
+            });
+          });
+
+        const resetInsertionBtn = document.getElementById(
+          "reset-insertion-btn"
+        );
+        if (resetInsertionBtn) {
+          resetInsertionBtn.addEventListener("click", function () {
+            handleResetInsertion();
+          });
+        }
+
+        const checkArrangementBtn = document.getElementById(
+          "check-arrangement-btn"
+        );
+        if (checkArrangementBtn) {
+          checkArrangementBtn.addEventListener("click", function () {
+            handleCheckArrangement();
+          });
+        }
+
+        // Single-player trace
+        document
+          .querySelectorAll("[data-action='show-trace']")
+          .forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              const start = parseInt(btn.getAttribute("data-start"), 10);
+              handleSetTraceStart(start);
+            });
+          });
+
+        const backArrangeBtn = document.getElementById("back-arrange-btn");
+        if (backArrangeBtn) {
+          backArrangeBtn.addEventListener("click", function () {
+            handleBackToArrange();
+          });
+        }
+
+        const newRoundBtn = document.getElementById("new-round-btn");
+        if (newRoundBtn) {
+          newRoundBtn.addEventListener("click", function () {
+            handleNewRound();
+          });
+        }
+
+        // Two-player chooser
+        const twoStartSelect = document.getElementById("two-start-select");
+        if (twoStartSelect) {
+          twoStartSelect.addEventListener("change", function (e) {
+            handleTwoStartChange(e.target.value);
+          });
+        }
+
+        const twoRunBtn = document.getElementById("two-run-btn");
+        if (twoRunBtn) {
+          twoRunBtn.addEventListener("click", function () {
+            handleTwoRun();
+          });
+        }
+      }
+
+      // Initialize
+      resetForNewGame();
+      render();
+    })();
+  </script>
+</body>
+</html>

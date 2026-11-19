@@ -1,0 +1,580 @@
+/* Add your CSS styles here */
+@font-face {
+    font-family: 'MK';
+    src: url('fonts/mortal_kombat/mk2.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Memento';
+    src: url('fonts/Memento/Memento.ttf') format('truetype');
+}
+
+/* General */
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Memento", Arial, Helvetica, system-ui, sans-serif;
+}
+
+body {
+    background-image: url('imgs/background.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    backdrop-filter: blur(5px);
+    /* background-position-y: -10rem; */
+    color: #D8D8d8;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#notification {
+    display: none;
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 1rem;
+    background-color: #4CAF50;
+    color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Title */
+
+/* #title-heading-container{
+    flex: 1;
+} */
+
+#title-heading {
+    font-size: 50px;
+    margin: 0;
+    padding: 0;
+    color: #f5f5f5;
+    /* Light text color */
+    text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    background-color: #000;
+    padding: 10px;
+    box-sizing: border-box;
+    animation: fire-color 3s infinite;
+    font-family: "MK";
+}
+
+/* Game board */
+
+#game-board {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    border-top: 2px solid #111110
+}
+
+#game-board>div {
+    border-right: 2px solid #111110;
+    /* change to your preferred color and thickness */
+}
+
+#game-board>div:last-child {
+    border-right: none;
+}
+
+/* Game header */
+header {
+    display: flex;
+    justify-content: space-between;
+}
+
+header h1,
+header h2,
+header h3,
+header h4,
+header p {
+    /* your styles here */
+    margin-block-start: 0.3em;
+    margin-block-end: 0.3em;
+}
+
+#game-info {
+    display: block;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+#player1-info,
+#player2-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#player1-info {
+    padding-left: 1rem;
+}
+
+#player2-info {
+    padding-right: 1rem;
+}
+
+.budget-container,
+.score-container {
+    display: flex;
+    align-items: center;
+    height: 20%;
+}
+
+.budget-container img {
+    margin-right: 0.2rem;
+    height: 50%;
+}
+
+/* Cards */
+.card {
+    /* Display */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 9rem;
+    min-width: 6rem;
+    border-radius: 10px;
+    padding: 2px;
+    text-align: center;
+    position: relative;
+    /* Background */
+    background: #141414;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* Box */
+    box-sizing: border-box;
+    box-shadow:
+        inset 0px 0em 10px 5px rgba(0, 0, 0, 0.5),
+        inset 0px -2em 25px 10px rgba(0, 0, 0, 0.5);
+}
+
+.card-wrapper {
+    padding: 1rem;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    padding: 3px;
+    border-radius: 10px;
+}
+
+.selectable:hover {
+    transform: scale(1.05);
+}
+
+.silver {
+    background: linear-gradient(45deg,
+            #999 5%,
+            #fff 10%,
+            #ccc 30%,
+            #ddd 50%,
+            #ccc 70%,
+            #fff 80%,
+            #999 95%);
+}
+
+.gold {
+    background: linear-gradient(45deg, #d4af37 5%, #debc5b 10%, #e7c97c 30%, #efd69d 50%, #e7c97c 70%, #debc5b 80%, #d4af37 95%);
+}
+
+.card img {
+    width: 100%;
+    height: auto;
+}
+
+.card-info {
+    width: 100%;
+    height: 20%;
+}
+
+.card-strength,
+.card-name {
+    font-size: 1rem;
+    font-weight: bold;
+    text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    margin-block-start: 0.4em;
+    margin-block-end: 0.5em;
+}
+
+
+/* Middle column */
+#middle-column {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+/* Card selection arena */
+
+.card-tiler-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 100%;
+    align-items: center;
+    border-bottom: 2px solid #111110;
+}
+
+.card-tiler-container .card {
+    min-width: 12rem;
+    min-height: 18rem;
+}
+
+.card-tiler-container .card-name,
+.card-tiler-container .card-strength {
+    font-size: 1.5rem;
+}
+
+
+/* All cards */
+#all-fighters {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+}
+
+/* Result */
+#result p {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Decks */
+.deck-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.deck-container h4 {
+    box-sizing: border-box;
+    text-shadow: #000 0px 0px 10px;
+}
+
+#player1-cards,
+#player2-cards {
+    flex: 1
+}
+
+.card-tiler-div {
+    text-align: center;
+    overflow: auto;
+    width: 80%;
+}
+
+.card-tiler-div>.card-wrapper {
+    display: inline-block;
+    margin: 10px;
+}
+
+/* Settings */
+
+
+/* --------------------------------------------------------------------------- */
+/* STYLED DEFAULTS
+/* --------------------------------------------------------------------------- */
+
+input,
+select {
+    padding: 5px;
+    font-family: inherit;
+}
+
+select {
+    font-size: 10pt;
+}
+
+input[type="text"] {
+    font-size: 10pt;
+    padding: 6px 8px;
+}
+
+button {
+    background: #d1d5db;
+    font-family: inherit;
+    font-size: 10pt;
+    color: #111827;
+    padding: 0.5rem;
+    border-radius: 5px;
+    border: none;
+    border-bottom: 2px solid #9ca3af;
+    margin-top: 2px;
+    cursor: pointer;
+}
+
+button:hover {
+    border-bottom: 4px solid #9ca3af;
+    margin-top: 0px;
+}
+
+button:focus {
+    border-bottom: 0px;
+    margin-top: 4px;
+}
+
+button.selected {
+    border-bottom: 0px;
+    margin-top: 4px;
+    background: #6b7280;
+    color: white;
+}
+
+
+/* --------------------------------------------------------------------------- */
+/* SETTINGS SCREEN COMPONENT-SPECIFIC STYLES
+/* --------------------------------------------------------------------------- */
+
+#settings-screen {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#settings-screen h1,
+#settings-screen h2,
+#settings-screen p{
+    color: black;
+}
+
+.kombat-title {
+    font-family: cursive;
+    font-weight: bold;
+    font-size: 1.1em;
+    letter-spacing: 1px;
+    margin-left: 5px;
+}
+
+#settings-modal {
+    padding: 1rem 2rem 2rem 2rem;
+    width: 600px;
+    background: white;
+    position: relative;
+    border-radius: 2px;
+    border: 1px solid #94a3b8;
+    border-top: 5px solid #64748b;
+}
+
+#settings-modal::after {
+    content: "";
+    position: absolute;
+    top: 0px;
+    left: 0;
+    background: #64748b;
+    border-top: 7px solid #64748b;
+    border-left: 7px solid #64748b;
+    border-bottom: 7px solid white;
+    border-right: 7px solid white;
+}
+
+#settings-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #94a3b8;
+}
+
+#settings-modal-header-title,
+#settings-modal-header-team {
+    margin: 0;
+    padding: 0;
+}
+
+#settings-modal-header-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+}
+
+#settings-modal-header-team {
+    font-size: 0.8em;
+    color: #777;
+}
+
+#settings-modal-intro {
+    margin: 1rem 0;
+}
+
+#settings-modal-body {
+    margin-top: 1.75rem;
+    margin-bottom: 2.5rem;
+}
+
+.setting-picker-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.75rem;
+}
+
+.setting-picker-item-label {
+    font-size: 0.7em;
+    color: #475569;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+}
+
+.setting-picker-item-input-container {
+    border: 1px solid #94a3b8;
+    border-radius: 1px;
+    display: flex;
+}
+
+.setting-picker-item-input-int-range,
+.setting-picker-item-input-float-range {
+    margin: 0 1rem;
+    flex: 1;
+}
+
+.setting-picker-item-input-value {
+    margin: 0 1rem;
+    display: flex;
+    text-align: center;
+    align-items: center;
+}
+
+.setting-picker-item-input-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.setting-picker-item-button {
+    flex: 1;
+}
+
+.setting-picker-item-button-Red.selected {
+    background: #ef4444;
+}
+
+.setting-picker-item-button-Green.selected {
+    background: #10b981;
+}
+
+.setting-picker-item-button-Blue.selected {
+    background: #0ea5e9;
+}
+
+#settings-modal-footer {
+    display: flex;
+}
+
+#start-game-button {
+    background-color: #333;
+    color: white;
+    border-color: #000;
+    flex: 1;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+/* Animations */
+
+@keyframes flicker {
+
+    /* Initial state of animation */
+    0%,
+    /* Final state of animation */
+    100% {
+        text-shadow:
+            0 -1px 3px #fff,
+            /* Innermost layer - intense heat (white) */
+            0 -2px 6px #FF3,
+            /* Second layer - core of flame (yellow) */
+            0 -6px 12px #F90,
+            /* Middle layer - body of flame (orange) */
+            0 -10px 20px #C33;
+        /* Outermost layer - edges of flame (red) */
+    }
+
+    /* Middle state of animation */
+    50% {
+        text-shadow:
+            0 -2px 6px #fff,
+            /* Innermost layer - intense heat (white) */
+            0 -4px 12px #FF3,
+            /* Second layer - core of flame (yellow) */
+            0 -8px 16px #F90,
+            /* Middle layer - body of flame (orange) */
+            0 -12px 24px #C33;
+        /* Outermost layer - edges of flame (red) */
+    }
+}
+
+@keyframes fire-color {
+    0% {
+        color: #801100;
+    }
+
+    10% {
+        color: #b62203;
+    }
+
+    20% {
+        color: #d73502;
+    }
+
+    30% {
+        color: #fc6400;
+    }
+
+    40% {
+        color: #ff7500;
+    }
+
+    50% {
+        color: #fac000;
+    }
+
+    60% {
+        color: #ffffff;
+    }
+
+    70% {
+        color: #b9e8ea;
+    }
+
+    80% {
+        color: #86d6d8;
+    }
+
+    90% {
+        color: #3fd0d4;
+    }
+
+    100% {
+        color: #20c3d0;
+    }
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}

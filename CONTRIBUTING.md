@@ -42,7 +42,7 @@ Then write your rules below it in Markdown.
 
 - Double-click `iframe.html`. The game should start with no console errors.
 - Optional: preview it inside the real site.
-  1. Install [Zola 0.19](https://www.getzola.org/documentation/getting-started/installation/) (on a Mac, `brew install zola`).
+  1. Install [Zola](https://www.getzola.org) (0.19 or newer; on a Mac, `brew install zola`).
   2. Run `zola serve` in the repo root.
   3. Open http://127.0.0.1:1111.
 
